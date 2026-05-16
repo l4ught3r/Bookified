@@ -8,8 +8,7 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 // Serialize Mongoose documents to plain JSON objects (strips ObjectId, Date, etc.)
-export const serializeData = <T>(data: T): T =>
-  JSON.parse(JSON.stringify(data));
+export const serializeData = <T>(data: T): T => JSON.parse(JSON.stringify(data));
 
 // Auto generate slug
 export function generateSlug(text: string): string {
@@ -122,6 +121,7 @@ export async function parsePDFFile(file: File) {
     }
 
     await firstPage.render({
+      canvas,
       canvasContext: context,
       viewport: viewport,
     }).promise;
@@ -154,8 +154,6 @@ export async function parsePDFFile(file: File) {
     };
   } catch (error) {
     console.error("Error parsing PDF:", error);
-    throw new Error(
-      `Failed to parse PDF file: ${error instanceof Error ? error.message : String(error)}`,
-    );
+    throw new Error(`Failed to parse PDF file: ${error instanceof Error ? error.message : String(error)}`);
   }
 }

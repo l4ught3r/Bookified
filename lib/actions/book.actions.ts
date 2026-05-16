@@ -17,9 +17,13 @@ export const checkBookExists = async (title: string) => {
     if (existingBook) {
       return {
         exists: true,
-        data: serializeData(existingBook),
+        book: serializeData(existingBook),
       };
     }
+
+    return {
+      exists: false,
+    };
   } catch (e) {
     console.error("Error checking book exists", e);
     return {
@@ -70,16 +74,14 @@ export const saveBookSegments = async (
     await connectToDatabase();
     console.log("Saving book segments...");
 
-    const segmentsToInsert = segments.map(
-      ({ text, segmentIndex, pageNumber, wordCount }) => ({
-        clerkId,
-        bookId,
-        content: text,
-        segmentIndex,
-        pageNumber,
-        wordCount,
-      }),
-    );
+    const segmentsToInsert = segments.map(({ text, segmentIndex, pageNumber, wordCount }) => ({
+      clerkId,
+      bookId,
+      content: text,
+      segmentIndex,
+      pageNumber,
+      wordCount,
+    }));
 
     await BookSegment.insertMany(segmentsToInsert);
 
@@ -95,8 +97,10 @@ export const saveBookSegments = async (
     console.error("Error saving book segments", e);
     await BookSegment.deleteMany({ bookId });
     await Book.findByIdAndDelete(bookId);
-    console.log(
-      "Delete book segments and book due to failure to save segments",
-    );
+    console.log("Delete book segments and book due to failure to save segments");
+    return {
+      success: false,
+      error: e,
+    };
   }
 };
