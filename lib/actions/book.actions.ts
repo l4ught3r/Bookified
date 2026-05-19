@@ -6,6 +6,25 @@ import { connectToDatabase } from "@/database/mongoose";
 import { generateSlug, serializeData } from "@/lib/utils";
 import { CreateBook, TextSegment } from "@/types";
 
+export const getAllBooks = async () => {
+  try {
+    await connectToDatabase();
+
+    const books = await Book.find().sort({ createdAt: -1 }).lean();
+
+    return {
+      success: true,
+      data: serializeData(books),
+    };
+  } catch (e) {
+    console.error("Error connecting to database", e);
+    return {
+      success: false,
+      error: e instanceof Error ? e.message : "Failed to connect tot database",
+    };
+  }
+};
+
 export const checkBookExists = async (title: string) => {
   try {
     await connectToDatabase();
@@ -28,7 +47,7 @@ export const checkBookExists = async (title: string) => {
     console.error("Error checking book exists", e);
     return {
       exists: false,
-      error: e,
+      error: e instanceof Error ? e.message : "Failed to check book exists",
     };
   }
 };
@@ -60,7 +79,7 @@ export const createBook = async (data: CreateBook) => {
 
     return {
       success: false,
-      error: e,
+      error: e instanceof Error ? e.message : "Failed to create book",
     };
   }
 };
@@ -100,7 +119,7 @@ export const saveBookSegments = async (
     console.log("Delete book segments and book due to failure to save segments");
     return {
       success: false,
-      error: e,
+      error: e instanceof Error ? e.message : "Failed to save book segments",
     };
   }
 };

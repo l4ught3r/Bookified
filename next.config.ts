@@ -1,9 +1,12 @@
-import type { NextConfig } from 'next'
+import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-	images: {
-		remotePatterns: [{ protocol: 'https', hostname: 'covers.openlibrary.org' }]
-	}
-}
+  images: {
+    remotePatterns: [
+      { protocol: "https", hostname: "covers.openlibrary.org" },
+      { protocol: "https", hostname: "p1stfyppwzrztwwo.public.blob.vercel-storage.com" },
+    ],
+  },
+};
 
-export default nextConfig
+export default nextConfig;
