@@ -113,7 +113,7 @@ const UploadForm = () => {
 
       if (!book.success) throw new Error("Failed to create book");
 
-      if (book.alredyExists) {
+      if (book.alreadyExists) {
         toast.info("Book with same title already exists.");
         form.reset();
         router.push(`/books/${book.data.slug}`);
