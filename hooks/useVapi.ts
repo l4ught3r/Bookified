@@ -23,7 +23,6 @@ export function useLatestRef<T>(value: T) {
 const VAPI_API_KEY = process.env.NEXT_PUBLIC_VAPI_API_KEY;
 const TIMER_INTERVAL_MS = 1000;
 const SECONDS_PER_MINUTE = 60;
-const TIME_WARNING_THRESHOLD = 60; // Show warning when this many seconds remain
 
 let vapi: InstanceType<typeof Vapi>;
 function getVapi() {
@@ -212,9 +211,14 @@ export function useVapi(book: IBook) {
 
     return () => {
       // End active session on unmount
-      if (sessionIdRef.current) {
+      const sessionId = sessionIdRef.current;
+      if (sessionId) {
+        const endDuration =
+          startTimeRef.current != null
+            ? Math.floor((Date.now() - startTimeRef.current) / TIMER_INTERVAL_MS)
+            : 0;
         getVapi().stop();
-        endVoiceSession(sessionIdRef.current, durationRef.current).catch((err) =>
+        endVoiceSession(sessionId, endDuration).catch((err) =>
           console.error("Failed to end voice session on unmount:", err),
         );
         sessionIdRef.current = null;
@@ -225,6 +229,7 @@ export function useVapi(book: IBook) {
       });
       if (timerRef.current) clearInterval(timerRef.current);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- Vapi singleton; latest values via useLatestRe
   }, []);
 
   const start = useCallback(async () => {
