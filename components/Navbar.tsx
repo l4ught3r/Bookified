@@ -14,42 +14,58 @@ const navItems = [
 
 const Navbar = () => {
   const pathName = usePathname();
+  const isAuthPage =
+    pathName.startsWith("/sign-in") || pathName.startsWith("/sign-up");
+
+  const logo = (
+    <>
+      <Image src="/assets/logo.png" alt="Bookfied" width={43} height={26} />
+      <span className="logo-text">Bookified</span>
+    </>
+  );
 
   return (
     <header className="w-full fixed z-50 bg-(--bg-primary)">
       <div className="wrapper navbar-height py-4 flex justify-between items-center">
-        <Link href="/" className="flex gap-0.5 items-center">
-          <Image src="/assets/logo.png" alt="Bookfied" width={43} height={26} />
-          <span className="logo-text">Bookified</span>
-        </Link>
+        {isAuthPage ? (
+          <div className="flex gap-0.5 items-center">{logo}</div>
+        ) : (
+          <Link href="/" className="flex gap-0.5 items-center">
+            {logo}
+          </Link>
+        )}
 
         <nav className="w-fit flex gap-7.5 items-center">
-          {navItems.map(({ label, href }) => {
-            const isActive = pathName === href || (href !== "/" && pathName.startsWith(href));
+          {!isAuthPage &&
+            navItems.map(({ label, href }) => {
+              const isActive =
+                pathName === href || (href !== "/" && pathName.startsWith(href));
 
-            return (
-              <Link
-                href={href}
-                key={label}
-                className={cn(
-                  "nav-link-base",
-                  isActive ? "nav-link-active" : "text-black hover:opacity-70",
-                )}
-              >
-                {label}
-              </Link>
-            );
-          })}
-          <div className="flex gap-7.5 items-center">
-            <Show when="signed-out">
-              <SignInButton mode="modal" />
-            </Show>
-            <Show when="signed-in">
-              <div className="nav-user-link">
-                <UserButton showName />
-              </div>
-            </Show>
-          </div>
+              return (
+                <Link
+                  href={href}
+                  key={label}
+                  className={cn(
+                    "nav-link-base",
+                    isActive ? "nav-link-active" : "text-black hover:opacity-70",
+                  )}
+                >
+                  {label}
+                </Link>
+              );
+            })}
+          {!isAuthPage && (
+            <div className="flex gap-7.5 items-center">
+              <Show when="signed-out">
+                <SignInButton mode="modal" />
+              </Show>
+              <Show when="signed-in">
+                <div className="nav-user-link">
+                  <UserButton showName />
+                </div>
+              </Show>
+            </div>
+          )}
         </nav>
       </div>
     </header>
