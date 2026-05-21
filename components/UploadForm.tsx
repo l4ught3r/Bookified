@@ -17,6 +17,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import { checkBookExists, createBook, saveBookSegments } from "@/lib/actions/book.actions";
 import { ACCEPTED_IMAGE_TYPES, ACCEPTED_PDF_TYPES } from "@/lib/constants";
 import { parsePDFFile } from "@/lib/utils";
@@ -25,7 +26,6 @@ import { BookUploadFormValues } from "@/types";
 import FileUploader from "./FileUploader";
 import LoadingOverlay from "./LoadingOverlay";
 import VoiceSelector from "./VoiceSelector";
-import { Input } from "./ui/input";
 
 const UploadForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -111,7 +111,13 @@ const UploadForm = () => {
         fileSize: pdfFile.size,
       });
 
-      if (!book.success) throw new Error("Failed to create book");
+      if (!book.success) {
+        toast.error((book.error as string) || "Failed to create book");
+        if (book.isBillingError) {
+          router.push("/subscriptions");
+        }
+        return;
+      }
 
       if (book.alreadyExists) {
         toast.info("Book with same title already exists.");
@@ -132,7 +138,7 @@ const UploadForm = () => {
     } catch (error) {
       console.error(error);
 
-      toast.error("Failed to upload book. Please try again.");
+      toast.error("Failed to upload book. Please try again later.");
     } finally {
       setIsSubmitting(false);
     }
