@@ -4,7 +4,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import Vapi from "@vapi-ai/web";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useSubscription } from "@/hooks/useSubscription";
 import { endVoiceSession, startVoiceSession } from "@/lib/actions/session.actions";
 import { ASSISTANT_ID, DEFAULT_VOICE, VOICE_SETTINGS } from "@/lib/constants";
@@ -38,8 +38,14 @@ function getVapi() {
 
 export type CallStatus = "idle" | "connecting" | "starting" | "listening" | "thinking" | "speaking";
 
+const TRANSCRIBER_LANGUAGE_MAP: Record<string, string> = {
+  en: "en",
+  ru: "ru",
+};
+
 export function useVapi(book: IBook) {
   const t = useTranslations("Errors");
+  const locale = useLocale();
   const { userId } = useAuth();
   const { limits } = useSubscription();
 
@@ -260,10 +266,19 @@ export function useVapi(book: IBook) {
       // Note: Server-returned maxDurationMinutes is informational only
       // The actual limit is enforced by useLatestRef(limits.maxSessionMinutes * 60)
 
-      const firstMessage = `Hey, good to meet you. Quick question before we dive in - have you actually read ${book.title} yet, or are we starting fresh?`;
+      const firstMessage =
+        locale === "ru"
+          ? `Привет, рад знакомству! Быстрый вопрос перед началом — ты уже читал "${book.title}" или начинаем с нуля?`
+          : `Hey, good to meet you. Quick question before we dive in - have you actually read ${book.title} yet, or are we starting fresh?`;
+
+      const transcriberLanguage = TRANSCRIBER_LANGUAGE_MAP[locale] ?? "en";
 
       await getVapi().start(ASSISTANT_ID, {
         firstMessage,
+        transcriber: {
+          provider: "11labs",
+          language: transcriberLanguage as "en" | "ru",
+        },
         variableValues: {
           title: book.title,
           author: book.author,
@@ -284,7 +299,7 @@ export function useVapi(book: IBook) {
       setStatus("idle");
       setLimitError(t("startFailed"));
     }
-  }, [book._id, book.title, book.author, voice, userId, t]);
+  }, [book._id, book.title, book.author, voice, userId, t, locale]);
 
   const stop = useCallback(() => {
     isStoppingRef.current = true;
