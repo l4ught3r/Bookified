@@ -1,25 +1,24 @@
+import { useTranslations } from "next-intl";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/lib/i18n/navigation";
 
 const HeroSection = () => {
+  const t = useTranslations("Hero");
+
   return (
     <section className="wrapper mb-10 md:mb-16">
       <div className="library-hero-card">
         <div className="library-hero-content">
           {/* Left Part */}
           <div className="library-hero-text">
-            <h1 className="library-hero-title text-4xl font-serif font-bold">Your Library</h1>
-            <p className="library-hero-description">
-              Convert your books into interactive AI conversations.{" "}
-              <br className="hidden md:block" />
-              Listen, learn, and discuss your favorite reads.
-            </p>
+            <h1 className="library-hero-title text-4xl font-serif font-bold">{t("title")}</h1>
+            <p className="library-hero-description">{t("description")}</p>
             <Link
               href="/books/new"
               className="library-cta-primary mt-4 flex items-center justify-center"
             >
               <span className="text-3xl font-light mb-1 mr-2">+</span>
-              <span className="text-[#212a3b]">Add new book</span>
+              <span className="text-[#212a3b]">{t("cta")}</span>
             </Link>
           </div>
 
@@ -27,7 +26,7 @@ const HeroSection = () => {
           <div className="library-hero-illustration-desktop">
             <Image
               src="/assets/hero-illustration.png"
-              alt="Vintage books and a globe"
+              alt={t("illustrationAlt")}
               width={491}
               height={352}
               className="object-contain"
@@ -38,7 +37,7 @@ const HeroSection = () => {
           <div className="library-hero-illustration">
             <Image
               src="/assets/hero-illustration.png"
-              alt="Vintage books and a globe"
+              alt={t("illustrationAlt")}
               width={491}
               height={352}
               className="object-contain"
@@ -53,8 +52,12 @@ const HeroSection = () => {
                   1
                 </div>
                 <div className="flex flex-col">
-                  <h3 className="library-step-title text-lg font-bold">Upload PDF</h3>
-                  <p className="library-step-description text-gray-500">Add your book file</p>
+                  <h3 className="library-step-title text-lg font-bold">
+                    {t("steps.upload.title")}
+                  </h3>
+                  <p className="library-step-description text-gray-500">
+                    {t("steps.upload.description")}
+                  </p>
                 </div>
               </li>
               <li className="library-step-item">
@@ -62,8 +65,12 @@ const HeroSection = () => {
                   2
                 </div>
                 <div className="flex flex-col">
-                  <h3 className="library-step-title text-lg font-bold">AI Processing</h3>
-                  <p className="library-step-description text-gray-500">We analyze the content</p>
+                  <h3 className="library-step-title text-lg font-bold">
+                    {t("steps.processing.title")}
+                  </h3>
+                  <p className="library-step-description text-gray-500">
+                    {t("steps.processing.description")}
+                  </p>
                 </div>
               </li>
               <li className="library-step-item">
@@ -71,8 +78,10 @@ const HeroSection = () => {
                   3
                 </div>
                 <div className="flex flex-col">
-                  <h3 className="library-step-title text-lg font-bold">Voice Chat</h3>
-                  <p className="library-step-description text-gray-500">Discuss with AI</p>
+                  <h3 className="library-step-title text-lg font-bold">{t("steps.chat.title")}</h3>
+                  <p className="library-step-description text-gray-500">
+                    {t("steps.chat.description")}
+                  </p>
                 </div>
               </li>
             </ul>

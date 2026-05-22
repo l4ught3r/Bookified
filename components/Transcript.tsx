@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { Mic } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Messages } from "@/types";
 
 interface TranscriptProps {
@@ -11,6 +12,7 @@ interface TranscriptProps {
 }
 
 const Transcript = ({ messages, currentMessage, currentUserMessage }: TranscriptProps) => {
+  const t = useTranslations("Transcript");
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -33,9 +35,9 @@ const Transcript = ({ messages, currentMessage, currentUserMessage }: Transcript
       <div className="transcript-empty">
         <Mic className="size-12 text-[#212a3b] mb-4" />
         <h2 className="transcript-empty-text">
-          <b>No conversation yet</b>
+          <b>{t("emptyTitle")}</b>
         </h2>
-        <p className="transcript-empty-hint">Click the mic button above to start talking</p>
+        <p className="transcript-empty-hint">{t("emptyHint")}</p>
       </div>
     );
   }
@@ -59,7 +61,6 @@ const Transcript = ({ messages, currentMessage, currentUserMessage }: Transcript
         </div>
       ))}
 
-      {/* User Streaming Message */}
       {currentUserMessage && (
         <div className="transcript-message transcript-message-user">
           <div className="transcript-bubble transcript-bubble-user">
@@ -69,7 +70,6 @@ const Transcript = ({ messages, currentMessage, currentUserMessage }: Transcript
         </div>
       )}
 
-      {/* Assistant Streaming Message */}
       {currentMessage && (
         <div className="transcript-message transcript-message-assistant">
           <div className="transcript-bubble transcript-bubble-assistant">

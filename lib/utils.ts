@@ -10,15 +10,74 @@ export function cn(...inputs: ClassValue[]) {
 // Serialize Mongoose documents to plain JSON objects (strips ObjectId, Date, etc.)
 export const serializeData = <T>(data: T): T => JSON.parse(JSON.stringify(data));
 
-// Auto generate slug
+const CYRILLIC_TO_LATIN: Record<string, string> = {
+  а: "a",
+  б: "b",
+  в: "v",
+  г: "g",
+  д: "d",
+  е: "e",
+  ё: "e",
+  ж: "zh",
+  з: "z",
+  и: "i",
+  й: "y",
+  к: "k",
+  л: "l",
+  м: "m",
+  н: "n",
+  о: "o",
+  п: "p",
+  р: "r",
+  с: "s",
+  т: "t",
+  у: "u",
+  ф: "f",
+  х: "h",
+  ц: "ts",
+  ч: "ch",
+  ш: "sh",
+  щ: "sch",
+  ъ: "",
+  ы: "y",
+  ь: "",
+  э: "e",
+  ю: "yu",
+  я: "ya",
+};
+
+const transliterateCyrillic = (text: string): string =>
+  [...text].map((char) => CYRILLIC_TO_LATIN[char] ?? char).join("");
+
+export const toActionError = (error: unknown, fallback = "Something went wrong"): string => {
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  if (typeof error === "string") {
+    return error;
+  }
+
+  return fallback;
+};
+
+// Auto generate slug (Latin, Cyrillic via transliteration, fallback if empty)
 export function generateSlug(text: string): string {
-  return text
-    .replace(/\.[^/.]+$/, "") // Remove file extension (.pdf, .txt, etc.)
-    .toLowerCase() // Convert to lowercase
-    .trim() // Remove whitespace from both ends
-    .replace(/[^\w\s-]/g, "") // Remove special characters (keep letters, numbers, spaces, hyphens)
-    .replace(/[\s_]+/g, "-") // Replace spaces and underscores with hyphens
-    .replace(/^-+|-+$/g, ""); // Remove leading/trailing hyphens
+  const slug = transliterateCyrillic(
+    text
+      .replace(/\.[^/.]+$/, "")
+      .toLowerCase()
+      .trim(),
+  )
+    .replace(/[^\p{L}\p{N}\s-]/gu, "")
+    .replace(/[\s_]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+  if (slug) {
+    return slug;
+  }
+
+  return `book-${Date.now().toString(36)}`;
 }
 
 // Escape regex special characters to prevent ReDoS attacks

@@ -2,9 +2,8 @@ import { ReactNode } from "react";
 import { Control, FieldPath, FieldValues } from "react-hook-form";
 import { LucideIcon } from "lucide-react";
 import { Document, Types } from "mongoose";
-import z from "zod";
 import { PlanType } from "@/lib/subscription-constants";
-import { UploadSchema } from "@/lib/zod";
+import { BookUploadFormValues } from "@/lib/zod";
 
 // ============================================
 // DATABASE MODELS
@@ -54,7 +53,7 @@ export interface IVoiceSession extends Document {
 // FORM & INPUT TYPES
 // ============================================
 
-export type BookUploadFormValues = z.infer<typeof UploadSchema>;
+export type { BookUploadFormValues };
 
 export interface CreateBook {
   clerkId: string;

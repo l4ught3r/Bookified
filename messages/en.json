@@ -1,0 +1,138 @@
+{
+  "Navbar": {
+    "brand": "Bookified",
+    "library": "Library",
+    "addNew": "Add New",
+    "pricing": "Pricing",
+    "signIn": "Sign in"
+  },
+  "Hero": {
+    "title": "Your Library",
+    "description": "Convert your books into interactive AI conversations. Listen, learn, and discuss your favorite reads.",
+    "cta": "Add new book",
+    "illustrationAlt": "Vintage books and a globe",
+    "steps": {
+      "upload": {
+        "title": "Upload PDF",
+        "description": "Add your book file"
+      },
+      "processing": {
+        "title": "AI Processing",
+        "description": "We analyze the content"
+      },
+      "chat": {
+        "title": "Voice Chat",
+        "description": "Discuss with AI"
+      }
+    }
+  },
+  "Home": {
+    "recentBooks": "Recent Books"
+  },
+  "Search": {
+    "placeholder": "Search books by title or author"
+  },
+  "NewBook": {
+    "title": "Add a New Book",
+    "subtitle": "Upload a PDF to generate your interactive interview"
+  },
+  "UploadForm": {
+    "pdfLabel": "Book PDF File",
+    "pdfPlaceholder": "Click to upload PDF",
+    "pdfHint": "PDF file (max 50MB)",
+    "coverLabel": "Cover Image (Optional)",
+    "coverPlaceholder": "Click to upload cover image",
+    "coverHint": "Leave empty to auto-generate from PDF",
+    "titleLabel": "Title",
+    "titlePlaceholder": "ex: Rich Dad Poor Dad",
+    "authorLabel": "Author Name",
+    "authorPlaceholder": "ex: Robert Kiyosaki",
+    "voiceLabel": "Choose Assistant Voice",
+    "submit": "Begin Synthesis"
+  },
+  "Validation": {
+    "titleRequired": "Title is required",
+    "titleTooLong": "Title is too long",
+    "authorRequired": "Author name is required",
+    "authorTooLong": "Author name is too long",
+    "voiceRequired": "Please select a voice",
+    "pdfRequired": "PDF file is required",
+    "pdfSize": "File size must be less than 50MB",
+    "pdfType": "Only PDF files are accepted",
+    "imageSize": "Image size must be less than 10MB",
+    "imageType": "Only .jpg, .jpeg, .png and .webp formats are supported"
+  },
+  "Loading": {
+    "title": "Synthesizing Your Book",
+    "description": "Please wait while we process your PDF and prepare your interactive literary experience."
+  },
+  "Subscriptions": {
+    "title": "Choose Your Plan",
+    "description": "Upgrade to unlock more books, longer sessions, and advanced features.",
+    "currentPlan": "Your Current Plan"
+  },
+  "Vapi": {
+    "byAuthor": "by {author}",
+    "voice": "Voice: {name}",
+    "status": {
+      "connecting": "Connecting...",
+      "starting": "Starting...",
+      "listening": "Listening",
+      "thinking": "Thinking...",
+      "speaking": "Speaking",
+      "ready": "Ready"
+    }
+  },
+  "Transcript": {
+    "emptyTitle": "No conversation yet",
+    "emptyHint": "Click the mic button above to start talking"
+  },
+  "Voice": {
+    "male": "Male Voices",
+    "female": "Female Voices",
+    "dave": {
+      "name": "Dave",
+      "description": "Young male, British-Essex, casual & conversational"
+    },
+    "daniel": {
+      "name": "Daniel",
+      "description": "Middle-aged male, British, authoritative but warm"
+    },
+    "chris": {
+      "name": "Chris",
+      "description": "Male, casual & easy-going"
+    },
+    "rachel": {
+      "name": "Rachel",
+      "description": "Young female, American, calm & clear"
+    },
+    "sarah": {
+      "name": "Sarah",
+      "description": "Young female, American, soft & approachable"
+    }
+  },
+  "Toast": {
+    "loginRequired": "Please login to upload books",
+    "bookExists": "Book with same title already exists.",
+    "parsePdfFailed": "Failed to parse PDF. Please try again with a different file.",
+    "createBookFailed": "Failed to create book",
+    "saveSegmentsFailed": "Failed to save book segments",
+    "uploadFailed": "Failed to upload book. Please try again later.",
+    "bookLimitReached": "You have reached the book limit for your plan. Please upgrade to add more books."
+  },
+  "Auth": {
+    "signInTitle": "Sign in"
+  },
+  "BookPage": {
+    "backAriaLabel": "Back to library"
+  },
+  "Errors": {
+    "signInRequired": "Please sign in to start a voice session.",
+    "sessionLimit": "Session limit reached. Please upgrade your plan.",
+    "sessionTimeLimit": "Session time limit ({minutes} minutes) reached. Upgrade your plan for longer sessions.",
+    "inactivity": "Session ended due to inactivity. Click the mic to start again.",
+    "connectionLost": "Connection lost. Please check your internet and try again.",
+    "unexpectedEnd": "Session ended unexpectedly. Click the mic to start again.",
+    "startFailed": "Failed to start voice session. Please try again."
+  }
+}

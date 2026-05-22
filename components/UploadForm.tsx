@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useAuth } from "@clerk/nextjs";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { upload } from "@vercel/blob/client";
 import { ImageIcon, Upload } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useRouter } from "@/lib/i18n/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,19 +22,28 @@ import { Input } from "@/components/ui/input";
 import { checkBookExists, createBook, saveBookSegments } from "@/lib/actions/book.actions";
 import { ACCEPTED_IMAGE_TYPES, ACCEPTED_PDF_TYPES } from "@/lib/constants";
 import { parsePDFFile } from "@/lib/utils";
-import { UploadSchema } from "@/lib/zod";
+import { createUploadSchema } from "@/lib/zod";
 import { BookUploadFormValues } from "@/types";
 import FileUploader from "./FileUploader";
 import LoadingOverlay from "./LoadingOverlay";
 import VoiceSelector from "./VoiceSelector";
 
 const UploadForm = () => {
+  const t = useTranslations("UploadForm");
+  const toastT = useTranslations("Toast");
+  const validationT = useTranslations("Validation");
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { userId } = useAuth();
   const router = useRouter();
 
+  const uploadSchema = useMemo(
+    () => createUploadSchema((key) => validationT(key)),
+    [validationT],
+  );
+
   const form = useForm<BookUploadFormValues>({
-    resolver: zodResolver(UploadSchema),
+    resolver: zodResolver(uploadSchema),
     defaultValues: {
       title: "",
       author: "",
@@ -45,7 +55,7 @@ const UploadForm = () => {
 
   const onSubmit = async (data: BookUploadFormValues) => {
     if (!userId) {
-      return toast.error("Please login to upload books");
+      return toast.error(toastT("loginRequired"));
     }
 
     setIsSubmitting(true);
@@ -56,7 +66,7 @@ const UploadForm = () => {
       const existsCheck = await checkBookExists(data.title);
 
       if (existsCheck.exists && existsCheck.book) {
-        toast.info("Book with same title already exists.");
+        toast.info(toastT("bookExists"));
         form.reset();
         router.push(`/books/${existsCheck.book.slug}`);
         return;
@@ -68,7 +78,7 @@ const UploadForm = () => {
       const parsedPDF = await parsePDFFile(pdfFile);
 
       if (parsedPDF.content.length === 0) {
-        toast.error("Failed to parse PDF. Please try again with a different file.");
+        toast.error(toastT("parsePdfFailed"));
         return;
       }
 
@@ -112,7 +122,11 @@ const UploadForm = () => {
       });
 
       if (!book.success) {
-        toast.error((book.error as string) || "Failed to create book");
+        toast.error(
+          book.isBillingError
+            ? toastT("bookLimitReached")
+            : (book.error as string) || toastT("createBookFailed"),
+        );
         if (book.isBillingError) {
           router.push("/subscriptions");
         }
@@ -120,7 +134,7 @@ const UploadForm = () => {
       }
 
       if (book.alreadyExists) {
-        toast.info("Book with same title already exists.");
+        toast.info(toastT("bookExists"));
         form.reset();
         router.push(`/books/${book.data.slug}`);
         return;
@@ -129,7 +143,7 @@ const UploadForm = () => {
       const segments = await saveBookSegments(book.data._id, userId, parsedPDF.content);
 
       if (!segments.success) {
-        toast.error("Failed to save book segments");
+        toast.error(toastT("saveSegmentsFailed"));
         throw new Error("Failed to save book segments");
       }
 
@@ -138,7 +152,7 @@ const UploadForm = () => {
     } catch (error) {
       console.error(error);
 
-      toast.error("Failed to upload book. Please try again later.");
+      toast.error(toastT("uploadFailed"));
     } finally {
       setIsSubmitting(false);
     }
@@ -155,11 +169,11 @@ const UploadForm = () => {
             <FileUploader
               control={form.control}
               name="pdfFile"
-              label="Book PDF File"
+              label={t("pdfLabel")}
               acceptTypes={ACCEPTED_PDF_TYPES}
               icon={Upload}
-              placeholder="Click to upload PDF"
-              hint="PDF file (max 50MB)"
+              placeholder={t("pdfPlaceholder")}
+              hint={t("pdfHint")}
               disabled={isSubmitting}
             />
 
@@ -167,11 +181,11 @@ const UploadForm = () => {
             <FileUploader
               control={form.control}
               name="coverImage"
-              label="Cover Image (Optional)"
+              label={t("coverLabel")}
               acceptTypes={ACCEPTED_IMAGE_TYPES}
               icon={ImageIcon}
-              placeholder="Click to upload cover image"
-              hint="Leave empty to auto-generate from PDF"
+              placeholder={t("coverPlaceholder")}
+              hint={t("coverHint")}
               disabled={isSubmitting}
             />
 
@@ -181,11 +195,11 @@ const UploadForm = () => {
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="form-label">Title</FormLabel>
+                  <FormLabel className="form-label">{t("titleLabel")}</FormLabel>
                   <FormControl>
                     <Input
                       className="form-input"
-                      placeholder="ex: Rich Dad Poor Dad"
+                      placeholder={t("titlePlaceholder")}
                       {...field}
                       disabled={isSubmitting}
                     />
@@ -201,11 +215,11 @@ const UploadForm = () => {
               name="author"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="form-label">Author Name</FormLabel>
+                  <FormLabel className="form-label">{t("authorLabel")}</FormLabel>
                   <FormControl>
                     <Input
                       className="form-input"
-                      placeholder="ex: Robert Kiyosaki"
+                      placeholder={t("authorPlaceholder")}
                       {...field}
                       disabled={isSubmitting}
                     />
@@ -221,7 +235,7 @@ const UploadForm = () => {
               name="persona"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="form-label">Choose Assistant Voice</FormLabel>
+                  <FormLabel className="form-label">{t("voiceLabel")}</FormLabel>
                   <FormControl>
                     <VoiceSelector
                       value={field.value}
@@ -236,7 +250,7 @@ const UploadForm = () => {
 
             {/* 6. Submit Button */}
             <Button type="submit" className="form-btn" disabled={isSubmitting}>
-              Begin Synthesis
+              {t("submit")}
             </Button>
           </form>
         </Form>

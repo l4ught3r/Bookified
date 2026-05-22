@@ -1,20 +1,19 @@
-import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata } from "next";
-import { IBM_Plex_Serif, Mona_Sans } from "next/font/google";
-import Navbar from "@/components/Navbar";
+import { IBM_Plex_Serif, Inter } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
 const ibmPexSerif = IBM_Plex_Serif({
-  subsets: ["latin"],
+  subsets: ["latin", "cyrillic"],
   variable: "--font-ibm-plex-serif",
   weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
-const monaSans = Mona_Sans({
-  subsets: ["latin"],
-  variable: "--font-mona-sans",
+const inter = Inter({
+  subsets: ["latin", "cyrillic"],
+  variable: "--font-sans",
+  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
@@ -31,14 +30,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${ibmPexSerif.variable} ${monaSans.variable} relative font-sans antialiased`}
-      >
-        <ClerkProvider>
-          <Navbar />
-          {children}
-          <Toaster />
-        </ClerkProvider>
+      <body className={`${ibmPexSerif.variable} ${inter.variable} relative font-sans antialiased`}>
+        {children}
+        <Toaster />
       </body>
     </html>
   );

@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { Search as SearchIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 
 const Search = () => {
+  const t = useTranslations("Search");
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -35,7 +37,7 @@ const Search = () => {
       </div>
       <Input
         type="text"
-        placeholder="Search books by title or author"
+        placeholder={t("placeholder")}
         className="library-search-input border-none shadow-none focus-visible:ring-0"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
