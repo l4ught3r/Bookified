@@ -1,3 +1,6 @@
+<div align="right">
+  <a href="README.md">English</a> | <a href="README.ru.md">Русский</a>
+</div>
 <div align="center">
   <br />
       <img src="public/readme/readme-hero.png" alt="Project Banner">
