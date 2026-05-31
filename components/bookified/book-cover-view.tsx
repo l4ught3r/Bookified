@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
-import { isAuthenticatedBookAssetUrl } from "@/lib/books/asset-url";
 import { ChevronRight } from "lucide-react";
 import { useTranslations } from "next-intl";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import { isAuthenticatedBookAssetUrl } from "@/lib/books/asset-url";
 import { cn } from "@/lib/utils";
 
 type BookCoverViewProps = {
@@ -37,7 +37,7 @@ export function BookCoverView({
       )}
     >
       <div className="flex w-full max-w-md flex-col items-center text-center">
-        <div className="relative mb-8 aspect-[2/3] w-full max-w-[280px] overflow-hidden rounded-2xl border border-border/40 bg-card shadow-lg">
+        <div className="relative mb-8 aspect-2/3 w-full max-w-[280px] overflow-hidden rounded-2xl border border-border/40 bg-card shadow-lg">
           {showCover && coverUrl ? (
             <Image
               src={coverUrl}

@@ -10,7 +10,6 @@ import {
 } from "@/components/bookified/library-books-view";
 import { DeleteBookDialog } from "@/components/bookified/delete-book-dialog";
 import { TopNavbar } from "@/components/bookified/top-navbar";
-import { AuthSignInButton } from "@/components/auth/clerk-auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useLibraryBooks } from "@/hooks/use-library-books";
@@ -288,18 +287,6 @@ export default function LibraryPage() {
               {loading ? t("loadingBooks") : t("booksCount", { count: books.length })}
             </p>
           </div>
-
-          {!isSignedIn && !loading && books.length === 0 ? (
-            <div className="empty-state-panel mb-8 max-w-lg mx-auto">
-              <h2 className="font-display text-lg font-semibold tracking-tight">{t("signInTitle")}</h2>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                {t("signInDescription")}
-              </p>
-              <AuthSignInButton>
-                <Button className="mt-5 rounded-lg">{tCommon("signIn")}</Button>
-              </AuthSignInButton>
-            </div>
-          ) : null}
 
           <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div className="relative flex-1 md:max-w-md">

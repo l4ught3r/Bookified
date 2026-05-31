@@ -25,7 +25,6 @@ const nextConfig: NextConfig = {
         hostname: "images.unsplash.com",
       },
       { protocol: "https", hostname: "covers.openlibrary.org" },
-      { protocol: "https", hostname: "p1stfyppwzrztwwo.public.blob.vercel-storage.com" },
       { protocol: "https", hostname: "cdn.simpleicons.org" },
     ],
   },
