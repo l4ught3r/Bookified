@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
-import { bookAccessError, requireBookAccess } from "@/lib/auth/require-book-access";
-import { findBookAssetById, findBookCoverAsset } from "@/lib/books/find-book-asset";
+import {
+  bookAccessError,
+  requireBookAccess,
+  updateBookById,
+} from "@/lib/auth/require-book-access";
+import { resolveBookCoverAsset } from "@/lib/books/find-book-asset";
 import { downloadBookFile } from "@/lib/storage/book-storage";
 
 export async function GET(
@@ -14,13 +18,25 @@ export async function GET(
       return bookAccessError(access);
     }
 
-    let asset = await findBookAssetById(access.book._id, assetsId);
-    if (!asset) {
-      asset = await findBookCoverAsset(access.book._id);
-    }
+    const { asset, source } = await resolveBookCoverAsset(
+      access.book._id,
+      assetsId,
+      access.book.coverAssetId,
+    );
 
     if (!asset) {
+      if (access.book.coverAssetId) {
+        await updateBookById(access.book._id, { coverAssetId: null });
+      }
+
       return NextResponse.json({ error: "Asset not found" }, { status: 404 });
+    }
+
+    if (
+      asset.id !== access.book.coverAssetId &&
+      (source === "coverKind" || source === "coverHref" || source === "bookCoverAssetId")
+    ) {
+      await updateBookById(access.book._id, { coverAssetId: asset.id });
     }
 
     const data = await downloadBookFile(asset.storagePath);

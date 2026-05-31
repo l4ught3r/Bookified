@@ -2,10 +2,9 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "@clerk/nextjs";
-import dynamic from "next/dynamic";
 import { BookOpen, Loader2, Sparkles } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import type { AiChatLocale } from "@/lib/ai/book-context";
+import dynamic from "next/dynamic";
 import { AISidebar } from "@/components/bookified/ai-sidebar";
 import { BookCoverView } from "@/components/bookified/book-cover-view";
 import { LeftSidebar } from "@/components/bookified/left-sidebar";
@@ -14,19 +13,20 @@ import { TopNavbar } from "@/components/bookified/top-navbar";
 import { ReadingFontsProvider } from "@/components/providers/reading-fonts-provider";
 import { Button } from "@/components/ui/button";
 import { useIsMobileLayout } from "@/hooks/use-media-query";
+import type { AiChatLocale } from "@/lib/ai/book-context";
 import { isBookIdUuid } from "@/lib/books/book-id";
 import {
   buildNavigationDisplayItems,
   toNavigationItemInput,
   type NavigationKindLabels,
 } from "@/lib/books/navigation-labels";
-import { buildTocHrefTitleMap } from "@/lib/books/toc-titles";
 import {
   clearLastReadIfBook,
   getLastChapterOrder,
   getSavedReaderPosition,
   setLastRead,
 } from "@/lib/books/reader-storage";
+import { buildTocHrefTitleMap } from "@/lib/books/toc-titles";
 import { Link, useRouter } from "@/lib/i18n/navigation";
 import {
   COVER_CHAPTER_ID,
@@ -34,6 +34,7 @@ import {
   type CachedBookMeta,
   type ReaderChapterInput,
 } from "@/lib/store/useBookStore";
+import { cn } from "@/lib/utils";
 
 const PdfReadingArea = dynamic(
   () => import("@/components/bookified/pdf-reading-area").then((mod) => mod.PdfReadingArea),
@@ -401,7 +402,13 @@ export function ReaderView({ bookId }: ReaderViewProps) {
   }
 
   return (
-    <ReadingFontsProvider className="flex h-dvh flex-col bg-background">
+    <ReadingFontsProvider
+      className={cn(
+        "flex h-dvh flex-col bg-background",
+        isMobileLayout &&
+          "[--reader-floating-chrome-top:calc(env(safe-area-inset-top)+7.75rem)]",
+      )}
+    >
       <TopNavbar />
 
       {isMobileLayout ? (
@@ -410,23 +417,21 @@ export function ReaderView({ bookId }: ReaderViewProps) {
             type="button"
             variant={leftSidebarOpen ? "secondary" : "outline"}
             size="sm"
-            className="min-h-10 flex-1 rounded-xl"
+            className="min-h-10 min-w-20 rounded-xl"
             onClick={() => setLeftSidebarOpen(true)}
             aria-expanded={leftSidebarOpen}
           >
             <BookOpen className="h-4 w-4 shrink-0" aria-hidden />
-            <span className="truncate">{t("showLibrary")}</span>
           </Button>
           <Button
             type="button"
             variant={rightSidebarOpen ? "secondary" : "outline"}
             size="sm"
-            className="min-h-10 flex-1 rounded-xl"
+            className="min-h-10 min-w-20 rounded-xl"
             onClick={() => setRightSidebarOpen(true)}
             aria-expanded={rightSidebarOpen}
           >
             <Sparkles className="h-4 w-4 shrink-0" aria-hidden />
-            <span className="truncate">{t("askAi")}</span>
           </Button>
         </div>
       ) : null}
@@ -573,10 +578,7 @@ export function ReaderEmptyState() {
           onToggle={() => setLeftSidebarOpen((open) => !open)}
         />
 
-        <main
-          id="main-content"
-          className="flex h-full min-h-0 min-w-0 flex-1 flex-col"
-        >
+        <main id="main-content" className="flex h-full min-h-0 min-w-0 flex-1 flex-col">
           <div className="flex h-full flex-col items-center justify-center gap-5 bg-reading-bg px-4 py-6 text-center sm:px-6">
             <div className="max-w-md space-y-2">
               <h1 className="type-page-title">{t("selectBook")}</h1>

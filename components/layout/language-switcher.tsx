@@ -22,7 +22,7 @@ const LanguageSwitcher = () => {
 
   return (
     <div
-      className="flex items-center rounded-xl bg-secondary p-1"
+      className="flex items-center rounded-lg bg-secondary p-0.5 sm:rounded-xl sm:p-1"
       role="group"
       aria-label={t("language")}
     >
@@ -36,13 +36,13 @@ const LanguageSwitcher = () => {
             locale={code}
             aria-current={isActive ? "true" : undefined}
             className={cn(
-              "flex h-10 min-w-10 items-center gap-1 rounded-lg px-2 text-sm font-medium transition-colors sm:h-11 sm:min-w-11 sm:px-2.5",
+              "flex h-8 min-w-8 items-center justify-center rounded-md px-1.5 text-xs font-medium transition-colors sm:h-11 sm:min-w-11 sm:rounded-lg sm:px-2.5 sm:text-sm",
               isActive
                 ? "bg-card text-foreground shadow-sm"
                 : "text-muted-foreground hover:text-foreground",
             )}
           >
-            {code === "ru" && <Globe className="h-3.5 w-3.5" aria-hidden />}
+            <Globe className="mr-0.5 hidden h-3.5 w-3.5 sm:mr-1 sm:inline" aria-hidden />
             {label}
           </Link>
         );

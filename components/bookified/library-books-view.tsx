@@ -68,7 +68,7 @@ function LibraryBooksGrid({
             key={virtualRow.key}
             data-index={virtualRow.index}
             ref={rowVirtualizer.measureElement}
-            className="absolute left-0 top-0 grid w-full grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"
+            className="absolute left-0 top-0 grid w-full grid-cols-2 gap-3 min-[480px]:gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"
             style={{ transform: `translateY(${virtualRow.start}px)` }}
           >
             {rowBooks.map((book, columnIndex) => {
@@ -110,7 +110,7 @@ function LibraryBooksList({
 
   return (
     <div
-      className="relative flex flex-col divide-y divide-border/50 rounded-xl border border-border/50 bg-card/50 px-4"
+      className="relative flex flex-col divide-y divide-border/50 rounded-xl border border-border/50 bg-card/50 px-3 sm:px-4"
       style={{ height: `${rowVirtualizer.getTotalSize()}px` }}
     >
       {rowVirtualizer.getVirtualItems().map((virtualRow) => {
@@ -174,7 +174,7 @@ export function LibraryBooksView({
   const staticGrid = (
     <div
       className={cn(
-        "grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5",
+        "grid grid-cols-2 gap-3 min-[480px]:gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5",
         !prefersReducedMotion && "animate-in fade-in duration-300",
       )}
     >
@@ -196,7 +196,7 @@ export function LibraryBooksView({
   const staticList = (
     <div
       className={cn(
-        "flex flex-col divide-y divide-border/50 rounded-xl border border-border/50 bg-card/50 px-4",
+        "flex flex-col divide-y divide-border/50 rounded-xl border border-border/50 bg-card/50 px-3 sm:px-4",
         !prefersReducedMotion && "animate-in fade-in duration-300",
       )}
     >

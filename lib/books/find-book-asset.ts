@@ -70,3 +70,44 @@ export async function findBookAssetById(
 
   return findBookAssetByHref(bookId, decodeURIComponent(assetId));
 }
+
+export type CoverAssetResolutionSource =
+  | "requestedId"
+  | "bookCoverAssetId"
+  | "coverKind"
+  | "coverHref";
+
+export type CoverAssetResolution = {
+  asset: AssetRecord | null;
+  source: CoverAssetResolutionSource | null;
+};
+
+export async function resolveBookCoverAsset(
+  bookId: string,
+  requestedAssetId: string,
+  bookCoverAssetId: string | null,
+): Promise<CoverAssetResolution> {
+  const byRequested = await findBookAssetById(bookId, requestedAssetId);
+  if (byRequested) {
+    return { asset: byRequested, source: "requestedId" };
+  }
+
+  if (bookCoverAssetId && bookCoverAssetId !== requestedAssetId) {
+    const byBookField = await findBookAssetById(bookId, bookCoverAssetId);
+    if (byBookField) {
+      return { asset: byBookField, source: "bookCoverAssetId" };
+    }
+  }
+
+  const byCoverKind = await findBookCoverAsset(bookId);
+  if (byCoverKind) {
+    return { asset: byCoverKind, source: "coverKind" };
+  }
+
+  const byCoverHref = await findBookAssetByHref(bookId, "__cover__");
+  if (byCoverHref) {
+    return { asset: byCoverHref, source: "coverHref" };
+  }
+
+  return { asset: null, source: null };
+}

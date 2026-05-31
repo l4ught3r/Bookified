@@ -84,7 +84,6 @@ export function LeftSidebar({ isOpen, onToggle, bookId, chapters = [] }: LeftSid
   }, [showMobileOverlay, onToggle]);
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const [recentExpanded, setRecentExpanded] = useState(true);
-  const [favoritesExpanded, setFavoritesExpanded] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchFocused, setSearchFocused] = useState(false);
   const libraryBooks = useBookStore((state) => state.libraryBooks);
@@ -176,9 +175,17 @@ export function LeftSidebar({ isOpen, onToggle, bookId, chapters = [] }: LeftSid
       }));
   }, [favoriteIds, booksById, bookId]);
 
-  useEffect(() => {
-    setFavoritesExpanded(favoriteBooks.length > 0);
-  }, [favoriteBooks.length]);
+  const favoriteCount = favoriteBooks.length;
+  const [favoritesUi, setFavoritesUi] = useState({
+    count: favoriteCount,
+    expanded: favoriteCount > 0,
+  });
+
+  if (favoritesUi.count !== favoriteCount) {
+    setFavoritesUi({ count: favoriteCount, expanded: favoriteCount > 0 });
+  }
+
+  const favoritesExpanded = favoritesUi.expanded;
 
   return (
     <>
@@ -332,7 +339,9 @@ export function LeftSidebar({ isOpen, onToggle, bookId, chapters = [] }: LeftSid
               title={t("favorites")}
               icon={<Heart className="h-4 w-4" aria-hidden />}
               expanded={favoritesExpanded}
-              onToggle={() => setFavoritesExpanded(!favoritesExpanded)}
+              onToggle={() =>
+                setFavoritesUi((prev) => ({ ...prev, expanded: !prev.expanded }))
+              }
               className="mt-4"
             >
               <div className="space-y-2">

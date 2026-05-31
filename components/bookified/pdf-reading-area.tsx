@@ -186,7 +186,7 @@ export function PdfReadingArea({
   return (
     <TooltipProvider>
       <div className="relative flex h-full flex-1 flex-col bg-reading-bg">
-        <div className="absolute left-0 right-0 top-0 z-10 h-1 overflow-hidden bg-border/30">
+        <div className="absolute left-0 right-0 top-0 z-10 hidden h-1 overflow-hidden bg-border/30 lg:block">
           <div
             className="h-full origin-left bg-progress transition-transform duration-300 motion-reduce:transition-none"
             style={{ transform: `scaleX(${progress / 100})`, width: "100%" }}

@@ -108,8 +108,8 @@ export function ClerkAuthControls() {
   return (
     <div
       className={cn(
-        "flex h-9 shrink-0 items-center overflow-hidden",
-        isMobileLayout ? "w-9 justify-center" : "w-30 justify-end",
+        "flex h-8 shrink-0 items-center overflow-hidden",
+        isMobileLayout ? "w-8 justify-center" : "w-30 justify-end",
         !isLoaded && "justify-center",
       )}
     >

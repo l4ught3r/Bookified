@@ -37,22 +37,25 @@ export function TopNavbar() {
   ] as const;
 
   return (
-    <header className="sticky top-0 z-50 flex h-14 shrink-0 items-center justify-between border-b border-border/50 bg-card px-3 pt-[env(safe-area-inset-top)] sm:h-16 sm:px-4">
-      <div className="flex min-w-0 items-center gap-2 sm:gap-4">
+    <header className="sticky top-0 z-50 flex h-14 shrink-0 items-center border-b border-border/50 bg-card px-2 pt-[env(safe-area-inset-top)] sm:h-16 sm:px-4">
+      <div className="flex min-w-0 flex-1 items-center justify-start">
         <Link
-          href="/"
-          className="flex min-w-0 items-center gap-2 rounded-xl px-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:px-2"
+          href="/library"
+          className="flex min-w-0 max-w-full items-center gap-1.5 rounded-xl px-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:gap-2 sm:px-2"
         >
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary">
-            <BookOpen className="h-5 w-5 text-primary-foreground" />
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary sm:h-9 sm:w-9 sm:rounded-xl">
+            <BookOpen className="h-4 w-4 text-primary-foreground sm:h-5 sm:w-5" />
           </div>
-          <span className="hidden font-display text-xl font-semibold tracking-tight sm:inline">
+          <span className="truncate font-display text-sm font-semibold tracking-tight min-[480px]:text-base sm:text-lg md:text-xl">
             {tCommon("brand")}
           </span>
         </Link>
       </div>
 
-      <nav className="hidden items-center gap-1 md:flex" aria-label={t("library")}>
+      <nav
+        className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-1 md:flex"
+        aria-label={t("library")}
+      >
         {navItems.map((item) => {
           const isActive =
             item.key === "reader"
@@ -83,13 +86,13 @@ export function TopNavbar() {
         })}
       </nav>
 
-      <div className="flex shrink-0 items-center gap-1 sm:gap-2">
+      <div className="flex min-w-0 flex-1 items-center justify-end gap-0.5 sm:gap-1.5 md:gap-2">
         <LanguageSwitcher />
         <Button
           variant="ghost"
           size="icon"
           onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-          className="h-10 w-10 rounded-xl hover:bg-secondary sm:h-11 sm:w-11"
+          className="hidden h-9 w-9 rounded-lg hover:bg-secondary min-[480px]:inline-flex sm:h-11 sm:w-11 sm:rounded-xl"
           aria-label={t("toggleTheme")}
         >
           {mounted && resolvedTheme === "light" ? (

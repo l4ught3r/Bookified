@@ -29,9 +29,11 @@ type LibraryBookCardProps = {
   ) => void;
 };
 
-const coverActionClass = "h-11 w-11 rounded-xl shadow-sm transition-colors";
+const coverActionClass =
+  "h-9 w-9 rounded-lg shadow-sm transition-colors sm:h-11 sm:w-11 sm:rounded-xl";
 
-const listActionClass = "h-11 w-11 rounded-xl shadow-sm transition-colors";
+const listActionClass =
+  "h-9 w-9 rounded-lg shadow-sm transition-colors sm:h-11 sm:w-11 sm:rounded-xl";
 
 function stopCardNavigation(event: React.SyntheticEvent) {
   event.preventDefault();
@@ -197,7 +199,7 @@ export function LibraryBookGridCard({
           <CoverProgress progress={progress} />
         </Link>
 
-        <div className="absolute left-2 top-2 z-20">
+        <div className="absolute left-1.5 top-1.5 z-20 sm:left-2 sm:top-2">
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
@@ -220,7 +222,7 @@ export function LibraryBookGridCard({
           </Tooltip>
         </div>
 
-        <div className="absolute right-2 top-2 z-20">
+        <div className="absolute right-1.5 top-1.5 z-20 sm:right-2 sm:top-2">
           <DeleteBookButton
             book={book}
             isDeleting={isDeleting}
@@ -252,10 +254,10 @@ export function LibraryBookListRow({
   const t = useTranslations("library");
 
   return (
-    <article className="@container group flex items-center gap-4 py-1 [contain-intrinsic-size:auto_96px] [content-visibility:auto] transition-colors duration-200 [@media(hover:hover)]:hover:bg-secondary/30">
+    <article className="@container group flex items-center gap-3 py-1 sm:gap-4 [contain-intrinsic-size:auto_96px] [content-visibility:auto] transition-colors duration-200 [@media(hover:hover)]:hover:bg-secondary/30">
       <Link
         href={`/reader/${book._id}`}
-        className="relative flex h-20 w-14 shrink-0 overflow-hidden rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="relative flex h-[4.5rem] w-12 shrink-0 overflow-hidden rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:h-20 sm:w-14"
       >
         <BookCoverImage
           book={book}
@@ -278,7 +280,7 @@ export function LibraryBookListRow({
         </Link>
       </div>
 
-      <div className="flex shrink-0 items-center gap-1.5">
+      <div className="flex shrink-0 items-center gap-1 sm:gap-1.5">
         <Tooltip>
           <TooltipTrigger asChild>
             <Button

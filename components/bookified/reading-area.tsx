@@ -19,7 +19,6 @@ import type { ReaderChapterItem } from "@/components/bookified/reader-contents-d
 import { ReadingBookmarkMarkers } from "@/components/bookified/reading-bookmark-markers";
 import { ReadingChapterBody } from "@/components/bookified/reading-chapter-body";
 import { ReadingSelectionToolbar } from "@/components/bookified/reading-selection-toolbar";
-import { useReadingTextSelection } from "@/hooks/use-reading-text-selection";
 import { useReadingFonts } from "@/components/providers/reading-fonts-provider";
 import { Button } from "@/components/ui/button";
 import { CircularProgress } from "@/components/ui/circular-progress";
@@ -35,6 +34,8 @@ import {
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useIsMobileLayout } from "@/hooks/use-media-query";
+import { useReadingTextSelection } from "@/hooks/use-reading-text-selection";
 import { htmlToChapterBlocks, textToChapterBlocks } from "@/lib/books/chapter-blocks";
 import {
   BOOKMARK_SCROLL_TOLERANCE,
@@ -132,6 +133,7 @@ export function ReadingArea({
     (messages.reader as { bookOriginalFont?: string } | undefined)?.bookOriginalFont ??
     (locale === "ru" ? "Исходный шрифт" : "Original typeface");
   const prefersReducedMotion = usePrefersReducedMotion();
+  const isMobileLayout = useIsMobileLayout();
   const bookTypography = useMemo(
     () => normalizeReadingTypography(typography ?? DEFAULT_READING_TYPOGRAPHY),
     [typography],
@@ -188,14 +190,34 @@ export function ReadingArea({
     textAlign,
     fontWeightBold,
   } = activeTypography;
-  const [contentsOpen, setContentsOpen] = useState(false);
-  const [scrollTop, setScrollTop] = useState(0);
-  const [viewportHeight, setViewportHeight] = useState(0);
-  const [chapterScrollPercent, setChapterScrollPercent] = useState(0);
   const contentRef = useRef<HTMLDivElement>(null);
   const pendingBookmarkScrollRef = useRef<ReaderBookmark | null>(null);
   const readingContentRef = useRef<HTMLDivElement>(null);
   const scrollPersistReadyRef = useRef(false);
+  const lastScrollTopRef = useRef(0);
+  const chapterOrder = chapter?.order;
+  const [readerUi, setReaderUi] = useState({
+    chapterOrder,
+    chromeVisible: true,
+    typographyOpen: false,
+    contentsOpen: false,
+  });
+
+  if (readerUi.chapterOrder !== chapterOrder) {
+    setReaderUi({
+      chapterOrder,
+      chromeVisible: true,
+      typographyOpen: false,
+      contentsOpen: false,
+    });
+  }
+
+  const readerChromeVisible = readerUi.chromeVisible;
+  const typographyOpen = readerUi.typographyOpen;
+  const contentsOpen = readerUi.contentsOpen;
+  const [scrollTop, setScrollTop] = useState(0);
+  const [viewportHeight, setViewportHeight] = useState(0);
+  const [chapterScrollPercent, setChapterScrollPercent] = useState(0);
 
   const {
     selectedText,
@@ -333,9 +355,23 @@ export function ReadingArea({
   }, [bookId, chapter?.order, chapterHtml, chapterText, isLoading]);
 
   useEffect(() => {
+    if (readerChromeVisible) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setReaderUi((prev) => ({ ...prev, typographyOpen: false, contentsOpen: false }));
+    }, 300);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [readerChromeVisible]);
+
+  useEffect(() => {
     const container = contentRef.current;
     const chapterOrder = chapter?.order;
     if (!container || chapterOrder == null) return;
+
+    lastScrollTopRef.current = 0;
 
     let timeout: ReturnType<typeof setTimeout> | undefined;
 
@@ -362,6 +398,22 @@ export function ReadingArea({
     const handleScroll = () => {
       scrollPersistReadyRef.current = true;
       updateScrollMetrics();
+
+      if (isMobileLayout) {
+        const scrollTopValue = container.scrollTop;
+        const delta = scrollTopValue - lastScrollTopRef.current;
+
+        if (scrollTopValue <= 8) {
+          setReaderUi((prev) => ({ ...prev, chromeVisible: true }));
+        } else if (delta > 6) {
+          setReaderUi((prev) => ({ ...prev, chromeVisible: false }));
+        } else if (delta < -6) {
+          setReaderUi((prev) => ({ ...prev, chromeVisible: true }));
+        }
+
+        lastScrollTopRef.current = scrollTopValue;
+      }
+
       if (timeout) clearTimeout(timeout);
       timeout = setTimeout(persistScroll, 150);
     };
@@ -399,7 +451,7 @@ export function ReadingArea({
       resizeObserver.disconnect();
       container.removeEventListener("scroll", handleScroll);
     };
-  }, [bookId, chapter?.order]);
+  }, [bookId, chapter?.order, isMobileLayout]);
 
   const scrollToBookmarkPosition = useCallback((anchorScrollTop: number) => {
     const container = contentRef.current;
@@ -440,7 +492,7 @@ export function ReadingArea({
 
   const handleBookmarkSelect = useCallback(
     (bookmark: ReaderBookmark) => {
-      setContentsOpen(false);
+      setReaderUi((prev) => ({ ...prev, contentsOpen: false }));
 
       const container = contentRef.current;
       const viewport = container?.clientHeight ?? viewportHeight;
@@ -529,15 +581,26 @@ export function ReadingArea({
   return (
     <TooltipProvider>
       <div className="relative flex h-full flex-1 flex-col bg-reading-bg">
-        <div className="absolute left-0 right-0 top-0 z-10 h-1 overflow-hidden bg-border/30">
+        <div className="absolute left-0 right-0 top-0 z-10 hidden h-1 overflow-hidden bg-border/30 lg:block">
           <div
             className="h-full origin-left bg-progress transition-transform duration-300 motion-reduce:transition-none"
             style={{ transform: `scaleX(${progress / 100})`, width: "100%" }}
           />
         </div>
 
-        <div className="absolute right-2 top-3 z-20 flex max-w-[calc(100%-1rem)] items-center gap-0.5 overflow-x-auto rounded-2xl border border-border/50 bg-card p-1 shadow-sm sm:right-5 sm:top-4 sm:gap-1 sm:p-1.5">
-          <Popover>
+        <div
+          className={cn(
+            "z-20 flex max-w-[calc(100%-1rem)] items-center gap-0.5 overflow-x-auto rounded-2xl border border-border/50 bg-card p-1 shadow-sm transition-[opacity,transform] duration-300 ease-in-out motion-reduce:transition-none sm:gap-1 sm:p-1.5",
+            isMobileLayout
+              ? "fixed right-3 top-(--reader-floating-chrome-top,calc(env(safe-area-inset-top)+7.75rem)) sm:right-4"
+              : "absolute right-2 top-3 sm:right-5 sm:top-4",
+            readerChromeVisible ? "opacity-100" : "opacity-0",
+          )}
+        >
+          <Popover
+            open={typographyOpen}
+            onOpenChange={(open) => setReaderUi((prev) => ({ ...prev, typographyOpen: open }))}
+          >
             <Tooltip>
               <TooltipTrigger asChild>
                 <PopoverTrigger asChild>
@@ -762,7 +825,7 @@ export function ReadingArea({
                 variant="ghost"
                 size="icon"
                 className="h-10 w-10 shrink-0 rounded-xl sm:h-11 sm:w-11"
-                onClick={() => setContentsOpen(true)}
+                onClick={() => setReaderUi((prev) => ({ ...prev, contentsOpen: true }))}
                 aria-label={t("tableOfContents")}
               >
                 <ListTree className="h-4 w-4" />
@@ -792,7 +855,7 @@ export function ReadingArea({
 
         <div
           ref={contentRef}
-          className="flex-1 overflow-y-auto px-4 py-10 pt-16 sm:px-6 sm:py-12 md:px-8 lg:px-24"
+          className="flex-1 overflow-y-auto px-4 py-10 pt-12 sm:px-6 sm:py-12 sm:pt-16 md:px-8 lg:px-24"
         >
           {showLoading ? (
             <div className="flex h-full flex-col items-center justify-center gap-3 text-muted-foreground">
@@ -844,7 +907,7 @@ export function ReadingArea({
         {contentsOpen ? (
           <ReaderContentsDialog
             open={contentsOpen}
-            onOpenChange={setContentsOpen}
+            onOpenChange={(open) => setReaderUi((prev) => ({ ...prev, contentsOpen: open }))}
             bookTitle={derivedTitle}
             bookAuthor={derivedAuthor}
             coverUrl={coverUrl}
