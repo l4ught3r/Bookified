@@ -1,0 +1,18 @@
+{
+  "prettier.semi": false,
+  "prettier.useTabs": true,
+  "editor.formatOnSave": true,
+  "prettier.singleQuote": true,
+  "prettier.jsxSingleQuote": true,
+  "prettier.arrowParens": "avoid",
+  "prettier.htmlWhitespaceSensitivity": "ignore",
+  "prettier.singleAttributePerLine": true,
+  "prettier.bracketSameLine": false,
+  "prettier.printWidth": 100,
+  "prettier.proseWrap": "always",
+  "prettier.trailingComma": "none",
+  "prettier.tabWidth": 2,
+  "printWidth": 100,
+  "plugins": ["@trivago/prettier-plugin-sort-imports"],
+  "importOrder": ["^react", "<THIRD_PARTY_MODULES>", "^@/", "^[./]"]
+}

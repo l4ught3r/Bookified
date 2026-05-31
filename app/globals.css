@@ -1,0 +1,572 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* Warm reading palette (oklch, tinted neutrals) */
+  --background: oklch(0.965 0.018 92);
+  --foreground: oklch(0.28 0.008 65);
+  --card: oklch(0.995 0.006 92);
+  --card-foreground: oklch(0.28 0.008 65);
+  --popover: oklch(0.995 0.006 92);
+  --popover-foreground: oklch(0.28 0.008 65);
+  --primary: oklch(0.745 0.095 88);
+  --primary-foreground: oklch(0.22 0.008 65);
+  --secondary: oklch(0.925 0.04 88);
+  --secondary-foreground: oklch(0.28 0.008 65);
+  --muted: oklch(0.925 0.04 88);
+  --muted-foreground: oklch(0.52 0.018 65);
+  --accent: oklch(0.97 0.025 90);
+  --accent-foreground: oklch(0.28 0.008 65);
+  --destructive: oklch(0.58 0.19 25);
+  --destructive-foreground: oklch(0.99 0.005 92);
+  --border: oklch(0.905 0.022 88);
+  --input: oklch(0.905 0.022 88);
+  --ring: oklch(0.745 0.095 88);
+  --chart-1: oklch(0.745 0.095 88);
+  --chart-2: oklch(0.58 0.04 65);
+  --chart-3: oklch(0.52 0.03 210);
+  --chart-4: oklch(0.72 0.05 165);
+  --chart-5: oklch(0.76 0.06 25);
+  --radius: 1rem;
+  --sidebar: oklch(0.995 0.006 92);
+  --sidebar-foreground: oklch(0.28 0.008 65);
+  --sidebar-primary: oklch(0.745 0.095 88);
+  --sidebar-primary-foreground: oklch(0.22 0.008 65);
+  --sidebar-accent: oklch(0.925 0.04 88);
+  --sidebar-accent-foreground: oklch(0.28 0.008 65);
+  --sidebar-border: oklch(0.905 0.022 88);
+  --sidebar-ring: oklch(0.745 0.095 88);
+
+  --reading-bg: oklch(0.99 0.008 92);
+  --ai-accent: oklch(0.48 0.04 65);
+  --ai-accent-foreground: oklch(0.99 0.005 92);
+  --progress: oklch(0.745 0.095 88);
+  --overlay: oklch(0.28 0.008 65 / 0.3);
+  --success: oklch(0.55 0.14 145);
+
+  --clerk-bg: oklch(0.965 0.018 92);
+  --clerk-fg: oklch(0.28 0.008 65);
+  --clerk-modal-bg: oklch(0.925 0.04 88 / 0.5);
+  --clerk-name-color: oklch(0.28 0.008 65);
+  --user-hover-bg: oklch(0.925 0.04 88 / 0.55);
+  --shadow-soft: oklch(0.28 0.008 65 / 0.28);
+}
+
+.dark {
+  --background: oklch(0.22 0.008 65);
+  --foreground: oklch(0.95 0.015 88);
+  --card: oklch(0.27 0.01 65);
+  --card-foreground: oklch(0.95 0.015 88);
+  --popover: oklch(0.27 0.01 65);
+  --popover-foreground: oklch(0.95 0.015 88);
+  --primary: oklch(0.745 0.095 88);
+  --primary-foreground: oklch(0.22 0.008 65);
+  --secondary: oklch(0.34 0.012 65);
+  --secondary-foreground: oklch(0.95 0.015 88);
+  --muted: oklch(0.34 0.012 65);
+  --muted-foreground: oklch(0.68 0.018 75);
+  --accent: oklch(0.34 0.012 65);
+  --accent-foreground: oklch(0.95 0.015 88);
+  --destructive: oklch(0.58 0.19 25);
+  --destructive-foreground: oklch(0.99 0.005 92);
+  --border: oklch(0.34 0.012 65);
+  --input: oklch(0.34 0.012 65);
+  --ring: oklch(0.745 0.095 88);
+  --chart-1: oklch(0.745 0.095 88);
+  --chart-2: oklch(0.68 0.018 75);
+  --chart-3: oklch(0.52 0.03 210);
+  --chart-4: oklch(0.72 0.05 165);
+  --chart-5: oklch(0.76 0.06 25);
+  --sidebar: oklch(0.27 0.01 65);
+  --sidebar-foreground: oklch(0.95 0.015 88);
+  --sidebar-primary: oklch(0.745 0.095 88);
+  --sidebar-primary-foreground: oklch(0.22 0.008 65);
+  --sidebar-accent: oklch(0.34 0.012 65);
+  --sidebar-accent-foreground: oklch(0.95 0.015 88);
+  --sidebar-border: oklch(0.34 0.012 65);
+  --sidebar-ring: oklch(0.745 0.095 88);
+
+  --reading-bg: oklch(0.24 0.009 65);
+  --ai-accent: oklch(0.78 0.09 88);
+  --ai-accent-foreground: oklch(0.22 0.008 65);
+  --overlay: oklch(0.15 0.005 65 / 0.5);
+  --success: oklch(0.65 0.14 145);
+
+  --clerk-bg: oklch(0.22 0.008 65);
+  --clerk-fg: oklch(0.95 0.015 88);
+  --clerk-modal-bg: oklch(0.34 0.012 65 / 0.5);
+  --clerk-name-color: oklch(0.95 0.015 88);
+  --user-hover-bg: oklch(0.34 0.012 65 / 0.65);
+  --shadow-soft: oklch(0.1 0.005 65 / 0.55);
+}
+
+@theme inline {
+  --font-sans: var(--font-geist-sans), "Geist", sans-serif;
+  --font-display: var(--font-newsreader), "Newsreader", Georgia, "Times New Roman", serif;
+  --font-serif: var(--font-display);
+  --font-mono: var(--font-geist-mono), "Geist Mono", monospace;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-reading-bg: var(--reading-bg);
+  --color-ai-accent: var(--ai-accent);
+  --color-ai-accent-foreground: var(--ai-accent-foreground);
+  --color-progress: var(--progress);
+  --color-overlay: var(--overlay);
+  --color-success: var(--success);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]) {
+    cursor: pointer;
+  }
+  button:disabled {
+    cursor: not-allowed;
+  }
+}
+
+@layer utilities {
+  .font-display {
+    font-family: var(--font-display);
+  }
+
+  .type-page-title {
+    font-family: var(--font-display);
+    font-size: clamp(1.75rem, 2vw + 1rem, 2.25rem);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+  }
+
+  .surface-library {
+    background-color: var(--background);
+    background-image: radial-gradient(
+      ellipse 120% 80% at 50% -20%,
+      color-mix(in oklab, var(--primary) 12%, transparent),
+      transparent 55%
+    );
+  }
+
+  .empty-state-panel {
+    @apply rounded-xl border border-border/60 bg-card px-6 py-10 text-center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--muted);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-foreground);
+}
+
+/* Reading text optimization */
+.reading-text {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.reading-text,
+.reading-text *,
+.reading-text .book-chapter-content,
+.reading-text .book-chapter-content * {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.reading-text ::selection,
+.reading-text *::selection {
+  background: color-mix(in oklab, var(--primary) 32%, var(--reading-bg));
+  color: var(--foreground);
+}
+
+.reading-text ::-moz-selection,
+.reading-text *::-moz-selection {
+  background: color-mix(in oklab, var(--primary) 32%, var(--reading-bg));
+  color: var(--foreground);
+}
+
+.book-chapter-content {
+  overflow-wrap: anywhere;
+  --reading-paragraph-spacing: 1em;
+  text-align: var(--reading-text-align, inherit) !important;
+}
+
+.reading-text
+  .book-chapter-content
+  :where(
+    p,
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    li,
+    td,
+    th,
+    dd,
+    dt,
+    blockquote,
+    div,
+    span,
+    section,
+    article,
+    pre
+  ) {
+  text-align: inherit !important;
+}
+
+.reading-font-bold.book-chapter-content :where(p, li, td, th, dd, dt, pre):not(.text-author) {
+  font-weight: 700 !important;
+}
+
+.reading-font-bold.book-chapter-content :where(h1, h2, h3, h4, h5, h6),
+.reading-font-bold.book-chapter-content :where(.fb2-title, .fb2-subtitle, .poem-title),
+.reading-font-bold.book-chapter-content .epigraph :where(p, li),
+.reading-font-bold.book-chapter-content .cite :where(p, li) {
+  font-weight: 600 !important;
+}
+
+.reading-font-bold.book-chapter-content .text-author {
+  font-weight: 400 !important;
+}
+
+.reading-text.reading-font-overridden
+  .book-chapter-content
+  :where(
+    p,
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    li,
+    td,
+    th,
+    dd,
+    dt,
+    blockquote,
+    div,
+    span,
+    section,
+    article,
+    pre
+  ),
+.reading-text.reading-embedded-book-font
+  .book-chapter-content
+  :where(
+    p,
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    li,
+    td,
+    th,
+    dd,
+    dt,
+    blockquote,
+    div,
+    span,
+    section,
+    article,
+    pre
+  ) {
+  font-family: inherit !important;
+}
+
+.book-chapter-content :where(p, blockquote, figure, pre, table, ul, ol, dl) {
+  margin-block: var(--reading-paragraph-spacing, 1em);
+}
+
+.book-chapter-content :where(p + p) {
+  margin-top: calc(var(--reading-paragraph-spacing, 1em) * 1.15);
+}
+
+.book-chapter-content .fb2-empty-line {
+  display: block;
+  min-height: calc(var(--reading-paragraph-spacing, 1em) * 1.75 * var(--fb2-empty-line-count, 1));
+  margin-block: calc(var(--reading-paragraph-spacing, 1em) * 0.75);
+}
+
+.book-chapter-content .fb2-empty-line[data-empty-lines="2"] {
+  --fb2-empty-line-count: 2;
+}
+
+.book-chapter-content .fb2-empty-line[data-empty-lines="3"] {
+  --fb2-empty-line-count: 3;
+}
+
+.book-chapter-content .fb2-empty-line[data-empty-lines="4"] {
+  --fb2-empty-line-count: 4;
+}
+
+.book-chapter-content .fb2-empty-line[data-empty-lines="5"] {
+  --fb2-empty-line-count: 5;
+}
+
+.book-chapter-content .book-inline-image {
+  margin-block: calc(var(--reading-paragraph-spacing, 1em) * 1.25);
+  text-align: center;
+}
+
+.book-chapter-content .book-inline-image img {
+  display: inline-block;
+  max-width: 100%;
+  height: auto;
+}
+
+.book-chapter-content .epigraph,
+.book-chapter-content .cite {
+  margin-block: calc(var(--reading-paragraph-spacing, 1em) * 1.1);
+}
+
+.book-chapter-content .text-author {
+  text-align: right !important;
+  font-style: italic;
+  color: var(--muted-foreground);
+  text-indent: 0;
+}
+
+.book-chapter-content .poem {
+  margin-block: calc(var(--reading-paragraph-spacing, 1em) * 1.25);
+}
+
+.book-chapter-content .subsection {
+  margin-top: calc(var(--reading-paragraph-spacing, 1em) * 1.5);
+}
+
+.book-chapter-content :where(h1, h2, h3, h4, h5, h6) {
+  margin-block: 1.25em 0.5em;
+  font-family: inherit;
+  line-height: 1.25;
+}
+
+.book-chapter-content :where(h1) {
+  font-size: 1.75em;
+  font-weight: 600;
+}
+
+.book-chapter-content :where(h2) {
+  font-size: 1.4em;
+  font-weight: 600;
+}
+
+.book-chapter-content :where(h3) {
+  font-size: 1.2em;
+  font-weight: 600;
+}
+
+.book-chapter-content :where(img, svg, video) {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin-inline: auto;
+  object-fit: contain;
+}
+
+.book-chapter-content img.book-cover-image,
+.book-chapter-content svg.book-cover-image,
+.book-chapter-content .book-cover-page img,
+.book-chapter-content .book-cover-page svg {
+  width: min(100%, 420px);
+  max-width: 100%;
+  height: auto;
+  max-height: min(80vh, 640px);
+  object-fit: contain;
+  margin-inline: auto;
+}
+
+.book-chapter-content .book-cover-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 0;
+  overflow: visible;
+}
+
+.book-chapter-content :where(figure, .book-inline-image, .book-cover-page) {
+  text-align: center !important;
+}
+
+.book-chapter-content :where(figcaption) {
+  margin-top: 0.5em;
+  font-size: 0.9em;
+  color: var(--muted-foreground);
+}
+
+.book-chapter-content :where(blockquote) {
+  padding-left: 1rem;
+  border-left: 2px solid var(--border);
+  font-style: italic;
+  color: var(--muted-foreground);
+}
+
+.book-chapter-content :where(table) {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.book-chapter-content :where(th, td) {
+  border: 1px solid var(--border);
+  padding: 0.5rem 0.75rem;
+  vertical-align: top;
+}
+
+.book-chapter-content :where(ul, ol) {
+  padding-left: 1.5rem;
+}
+
+.book-chapter-content :where(pre, code) {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.book-chapter-content :where(pre) {
+  overflow-x: auto;
+  border-radius: 0.375rem;
+  background: color-mix(in oklab, var(--secondary) 40%, transparent);
+  padding: 1rem;
+}
+
+.book-chapter-content :where(a) {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.cl-userButtonTrigger {
+  border-radius: 9999px;
+  transition:
+    background-color 180ms ease-out,
+    transform 180ms ease-out,
+    box-shadow 180ms ease-out;
+  padding-left: 2px;
+}
+
+.cl-userButtonTrigger:hover {
+  background-color: var(--user-hover-bg);
+}
+
+.cl-userButtonTrigger:active {
+  transform: scale(0.98);
+}
+
+.cl-userButtonTrigger:focus-visible,
+.cl-userButtonBox:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--ring) 25%, transparent);
+}
+
+.nav-user-link {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.nav-user-link .cl-userButtonBox,
+.nav-user-link .cl-userButtonTrigger {
+  max-width: 100%;
+  min-width: 0;
+}
+
+.nav-user-link .cl-userButtonOuterIdentifier {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* react-pdf: selectable text layer aligned with canvas */
+.pdf-reading-page .react-pdf__Page {
+  position: relative;
+}
+
+.pdf-reading-page .react-pdf__Page__textContent {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.pdf-reading-page .react-pdf__Page__textContent span {
+  color: transparent;
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.pdf-reading-page .react-pdf__Page__textContent ::selection,
+.pdf-reading-page .react-pdf__Page__textContent span::selection {
+  background: color-mix(in oklab, var(--primary) 35%, transparent);
+}
