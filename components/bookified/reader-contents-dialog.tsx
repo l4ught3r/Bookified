@@ -97,14 +97,15 @@ export function ReaderContentsDialog({
         aria-modal="true"
         aria-labelledby={titleId}
         className={cn(
-          "fixed top-14 bottom-14 right-14 z-101 flex w-[min(92%,24rem)] flex-col overflow-hidden",
-          "rounded-2xl border border-border/50 bg-card shadow-2xl",
-          "animate-in fade-in-0 slide-in-from-right-4 duration-200 motion-reduce:animate-none",
-          "sm:right-10 sm:w-[min(88%,28rem)]",
+          "fixed z-101 flex flex-col overflow-hidden border border-border/50 bg-card shadow-2xl",
+          "max-lg:inset-x-0 max-lg:bottom-0 max-lg:top-auto max-lg:max-h-[min(82dvh,640px)] max-lg:w-full max-lg:rounded-t-2xl max-lg:rounded-b-none",
+          "max-lg:animate-in max-lg:fade-in-0 max-lg:slide-in-from-bottom-4 max-lg:duration-200",
+          "lg:top-14 lg:bottom-14 lg:right-10 lg:left-auto lg:w-[min(88%,28rem)] lg:rounded-2xl",
+          "lg:animate-in lg:fade-in-0 lg:slide-in-from-right-4 lg:duration-200 motion-reduce:animate-none",
         )}
       >
-        <header className="flex shrink-0 items-start gap-3 border-b border-border/50 px-5 py-4">
-          <div className="relative h-[72px] w-[48px] shrink-0 overflow-hidden rounded-md border border-border/40 bg-background shadow-sm">
+        <header className="flex shrink-0 items-start gap-3 border-b border-border/50 px-4 py-3 max-lg:pt-4 sm:px-5 sm:py-4">
+          <div className="relative h-16 w-11 shrink-0 overflow-hidden rounded-md border border-border/40 bg-background shadow-sm max-lg:h-14 max-lg:w-10 sm:h-[72px] sm:w-12">
             {showCover ? (
               <Image
                 src={coverUrl!}
@@ -125,7 +126,7 @@ export function ReaderContentsDialog({
           <div className="min-w-0 flex-1 pt-0.5">
             <h2
               id={titleId}
-              className="font-display line-clamp-2 text-base font-semibold leading-snug tracking-tight"
+              className="font-display line-clamp-2 text-[0.9375rem] font-semibold leading-snug tracking-tight sm:text-base"
             >
               {bookTitle}
             </h2>
@@ -147,7 +148,7 @@ export function ReaderContentsDialog({
         </header>
 
         <div
-          className="flex shrink-0 border-b border-border/50 px-5"
+          className="flex shrink-0 border-b border-border/50 px-4 sm:px-5"
           role="tablist"
           aria-label={t("contentsTabs")}
         >
@@ -190,7 +191,7 @@ export function ReaderContentsDialog({
                     <button
                       type="button"
                       className={cn(
-                        "flex w-full items-center gap-3 px-5 py-3.5 text-left transition-colors hover:bg-secondary/40",
+                        "flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-secondary/40 sm:px-5 sm:py-3.5",
                         isCurrent && "bg-secondary/30",
                       )}
                       onClick={() => handleChapterClick(chapter.order)}
@@ -219,7 +220,7 @@ export function ReaderContentsDialog({
                 <li key={bookmark.id} className="group flex items-stretch">
                   <button
                     type="button"
-                    className="min-w-0 flex-1 px-5 py-3.5 text-left transition-colors hover:bg-secondary/40"
+                    className="min-w-0 flex-1 px-4 py-3 text-left transition-colors hover:bg-secondary/40 sm:px-5 sm:py-3.5"
                     onClick={() => handleBookmarkClick(bookmark)}
                   >
                     <p className="line-clamp-2 text-sm font-medium leading-snug text-foreground">
@@ -243,7 +244,7 @@ export function ReaderContentsDialog({
               ))}
             </ul>
           ) : (
-            <p className="px-5 py-10 text-center text-sm text-muted-foreground">
+            <p className="px-4 py-8 text-center text-sm text-muted-foreground sm:px-5 sm:py-10">
               {t("bookmarksEmpty")}
             </p>
           )}

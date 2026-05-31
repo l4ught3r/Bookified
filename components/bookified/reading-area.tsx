@@ -618,11 +618,18 @@ export function ReadingArea({
               <TooltipContent>{t("readingSettings")}</TooltipContent>
             </Tooltip>
             <PopoverContent
-              className="w-[min(calc(100vw-2rem),20rem)] rounded-sm p-4"
-              align="end"
-              sideOffset={8}
+              className={cn(
+                "overflow-y-auto rounded-xl border-border/50",
+                isMobileLayout
+                  ? "max-h-[min(72dvh,32rem)] w-[calc(100vw-1.25rem)] max-w-md p-3"
+                  : "w-[min(calc(100vw-2rem),20rem)] rounded-sm p-4",
+              )}
+              align={isMobileLayout ? "center" : "end"}
+              side={isMobileLayout ? "bottom" : "bottom"}
+              sideOffset={isMobileLayout ? 10 : 8}
+              collisionPadding={12}
             >
-              <div className="space-y-5">
+              <div className={cn(isMobileLayout ? "space-y-4" : "space-y-5")}>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between"></div>
                   <div className="flex items-center gap-2">
@@ -891,6 +898,7 @@ export function ReadingArea({
               <ReadingBookmarkMarkers
                 bookmarks={chapterBookmarks}
                 onNavigate={handleBookmarkSelect}
+                isMobileLayout={isMobileLayout}
               />
             </div>
           )}

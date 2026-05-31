@@ -8,9 +8,30 @@ import { cn } from "@/lib/utils";
 type ReadingBookmarkMarkersProps = {
   bookmarks: ReaderBookmark[];
   onNavigate: (bookmark: ReaderBookmark) => void;
+  isMobileLayout?: boolean;
 };
 
-export function ReadingBookmarkMarkers({ bookmarks, onNavigate }: ReadingBookmarkMarkersProps) {
+function bookmarkMarkerClass(isMobileLayout: boolean) {
+  return cn(
+    "pointer-events-auto absolute -translate-y-1/2 flex items-center justify-center transition-colors",
+    isMobileLayout
+      ? "right-0 h-8 w-8 rounded-md border border-primary/30 bg-card text-primary shadow-sm hover:border-primary/50 hover:bg-secondary"
+      : cn(
+          "-right-14 h-9 w-9 rounded-lg border border-primary/30 bg-card shadow-md backdrop-blur-sm",
+          "hover:border-primary/50 hover:bg-secondary",
+        ),
+  );
+}
+
+function bookmarkIconClass() {
+  return "h-4 w-4 fill-primary text-primary";
+}
+
+export function ReadingBookmarkMarkers({
+  bookmarks,
+  onNavigate,
+  isMobileLayout = false,
+}: ReadingBookmarkMarkersProps) {
   const t = useTranslations("reader");
 
   if (bookmarks.length === 0) return null;
@@ -21,17 +42,12 @@ export function ReadingBookmarkMarkers({ bookmarks, onNavigate }: ReadingBookmar
         <button
           key={bookmark.id}
           type="button"
-          className={cn(
-            "pointer-events-auto absolute -right-14 flex -translate-y-1/2",
-            "h-9 w-9 items-center justify-center rounded-lg border border-primary/30",
-            "bg-card shadow-md backdrop-blur-sm transition-colors",
-            "hover:border-primary/50 hover:bg-secondary",
-          )}
+          className={bookmarkMarkerClass(isMobileLayout)}
           style={{ top: bookmark.scrollTop }}
           aria-label={t("openBookmark")}
           onClick={() => onNavigate(bookmark)}
         >
-          <Bookmark className="h-4 w-4 fill-primary text-primary" aria-hidden />
+          <Bookmark className={bookmarkIconClass()} aria-hidden />
         </button>
       ))}
     </div>
