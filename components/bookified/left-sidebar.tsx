@@ -84,7 +84,7 @@ export function LeftSidebar({ isOpen, onToggle, bookId, chapters = [] }: LeftSid
   }, [showMobileOverlay, onToggle]);
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const [recentExpanded, setRecentExpanded] = useState(true);
-  const [favoritesExpanded, setFavoritesExpanded] = useState(true);
+  const [favoritesExpanded, setFavoritesExpanded] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchFocused, setSearchFocused] = useState(false);
   const libraryBooks = useBookStore((state) => state.libraryBooks);
@@ -175,6 +175,10 @@ export function LeftSidebar({ isOpen, onToggle, bookId, chapters = [] }: LeftSid
         progress: getReadingProgress(book._id, book.totalChapters),
       }));
   }, [favoriteIds, booksById, bookId]);
+
+  useEffect(() => {
+    setFavoritesExpanded(favoriteBooks.length > 0);
+  }, [favoriteBooks.length]);
 
   return (
     <>

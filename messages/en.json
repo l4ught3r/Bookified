@@ -182,7 +182,7 @@
       "contextTitle": "Explain context",
       "contextPrompt": "Explain the historical and cultural context of this chapter",
       "summaryTitle": "Summary",
-      "summaryPrompt": "Summarize what I've read so far",
+      "summaryPrompt": "Summarize this chapter.",
       "charactersTitle": "Character analysis",
       "charactersPrompt": "Analyze the main characters in this chapter"
     },
