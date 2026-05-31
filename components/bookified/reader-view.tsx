@@ -176,7 +176,6 @@ export function ReaderView({ bookId }: ReaderViewProps) {
 
   useEffect(() => {
     const mqMobile = window.matchMedia("(max-width: 1023px)");
-    const mqWide = window.matchMedia("(min-width: 1440px)");
 
     const applyLayout = () => {
       if (mqMobile.matches) {
@@ -186,16 +185,14 @@ export function ReaderView({ bookId }: ReaderViewProps) {
       }
 
       setLeftSidebarOpen(true);
-      setRightSidebarOpen(mqWide.matches);
+      setRightSidebarOpen(true);
     };
 
     applyLayout();
     mqMobile.addEventListener("change", applyLayout);
-    mqWide.addEventListener("change", applyLayout);
 
     return () => {
       mqMobile.removeEventListener("change", applyLayout);
-      mqWide.removeEventListener("change", applyLayout);
     };
   }, []);
 
@@ -519,7 +516,7 @@ export function ReaderEmptyState() {
   const t = useTranslations("reader");
   const tNav = useTranslations("nav");
   const [leftSidebarOpen, setLeftSidebarOpen] = useState(true);
-  const [rightSidebarOpen, setRightSidebarOpen] = useState(false);
+  const [rightSidebarOpen, setRightSidebarOpen] = useState(true);
   const isMobileLayout = useIsMobileLayout();
 
   useEffect(() => {
@@ -530,6 +527,7 @@ export function ReaderEmptyState() {
         setRightSidebarOpen(false);
       } else {
         setLeftSidebarOpen(true);
+        setRightSidebarOpen(true);
       }
     };
 
