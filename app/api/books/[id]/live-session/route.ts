@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import { buildBookAiContext, type AiChatLocale } from "@/lib/ai/book-context";
-import { buildLiveVoiceSystemInstruction, createGeminiLiveSessionToken } from "@/lib/ai/gemini-live";
+import {
+  buildLiveVoiceSystemInstruction,
+  createGeminiLiveSessionToken,
+  createGeminiLiveSessionTokenWithFallback,
+  type GeminiLiveModelTier,
+} from "@/lib/ai/gemini-live";
 import { bookAccessError, requireBookAccess } from "@/lib/auth/require-book-access";
 
 export const runtime = "nodejs";
@@ -9,6 +14,8 @@ type LiveSessionRequestBody = {
   chapterOrder?: number;
   locale?: AiChatLocale;
   selectedText?: string;
+  /** Request a specific tier; omit to try primary then auto-fallback on quota errors. */
+  modelTier?: GeminiLiveModelTier;
 };
 
 function isValidLocale(value: unknown): value is AiChatLocale {
@@ -48,7 +55,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     });
 
     const liveSystemPrompt = buildLiveVoiceSystemInstruction(systemPrompt, locale);
-    const session = await createGeminiLiveSessionToken(liveSystemPrompt);
+    const session =
+      body.modelTier === "primary" || body.modelTier === "fallback"
+        ? await createGeminiLiveSessionToken(liveSystemPrompt, body.modelTier)
+        : await createGeminiLiveSessionTokenWithFallback(liveSystemPrompt);
 
     return NextResponse.json(session);
   } catch (error: unknown) {

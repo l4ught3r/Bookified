@@ -9,8 +9,67 @@ import { getGeminiApiKey } from "@/lib/ai/gemini";
 
 export const GEMINI_LIVE_API_VERSION = "v1alpha" as const;
 
-export const DEFAULT_GEMINI_LIVE_MODEL =
+export type GeminiLiveModelTier = "primary" | "fallback";
+
+/** Preferred Live model (Gemini 3 Flash Live). */
+export const PRIMARY_GEMINI_LIVE_MODEL =
   process.env.GEMINI_LIVE_MODEL?.trim() || "gemini-3.1-flash-live-preview";
+
+/** Cheaper / broader-access Live model (Gemini 2.5 Flash Native Audio). */
+export const FALLBACK_GEMINI_LIVE_MODEL =
+  process.env.GEMINI_LIVE_MODEL_FALLBACK?.trim() ||
+  "gemini-2.5-flash-native-audio-preview-12-2025";
+
+/** @deprecated Use {@link PRIMARY_GEMINI_LIVE_MODEL}. */
+export const DEFAULT_GEMINI_LIVE_MODEL = PRIMARY_GEMINI_LIVE_MODEL;
+
+export function getGeminiLiveModelForTier(tier: GeminiLiveModelTier = "primary"): string {
+  return tier === "fallback" ? FALLBACK_GEMINI_LIVE_MODEL : PRIMARY_GEMINI_LIVE_MODEL;
+}
+
+/** True when the API indicates quota, billing, or model availability limits. */
+export function isGeminiLiveQuotaOrAvailabilityError(
+  message: string,
+  httpStatus?: number,
+): boolean {
+  if (httpStatus === 429 || httpStatus === 503) {
+    return true;
+  }
+
+  const lower = message.toLowerCase();
+
+  if (
+    lower.includes("resource_exhausted") ||
+    lower.includes("resource exhausted") ||
+    lower.includes("quota") ||
+    lower.includes("rate limit") ||
+    lower.includes("rate_limit") ||
+    lower.includes("too many requests") ||
+    lower.includes("billing") ||
+    lower.includes("payment required") ||
+    lower.includes("insufficient") ||
+    lower.includes("exceeded your") ||
+    lower.includes("exceeded the")
+  ) {
+    return true;
+  }
+
+  if (
+    (lower.includes("token") || lower.includes("credit")) &&
+    (lower.includes("limit") || lower.includes("exhausted") || lower.includes("insufficient"))
+  ) {
+    return true;
+  }
+
+  if (
+    (lower.includes("not found") || lower.includes("not available") || lower.includes("unsupported")) &&
+    lower.includes("model")
+  ) {
+    return true;
+  }
+
+  return false;
+}
 
 const LIVE_TOKEN_TTL_MS = 30 * 60 * 1000;
 const LIVE_NEW_SESSION_TTL_MS = 2 * 60 * 1000;
@@ -62,7 +121,17 @@ export function getGeminiLiveConnectConfig(systemInstruction: string) {
   };
 }
 
-export async function createGeminiLiveSessionToken(systemInstruction: string) {
+export type GeminiLiveSessionToken = {
+  token: string;
+  model: string;
+  modelTier: GeminiLiveModelTier;
+};
+
+export async function createGeminiLiveSessionToken(
+  systemInstruction: string,
+  modelTier: GeminiLiveModelTier = "primary",
+): Promise<GeminiLiveSessionToken> {
+  const model = getGeminiLiveModelForTier(modelTier);
   const client = new GoogleGenAI({
     apiKey: getGeminiApiKey(),
     httpOptions: { apiVersion: GEMINI_LIVE_API_VERSION },
@@ -79,7 +148,7 @@ export async function createGeminiLiveSessionToken(systemInstruction: string) {
       newSessionExpireTime,
       httpOptions: { apiVersion: GEMINI_LIVE_API_VERSION },
       liveConnectConstraints: {
-        model: DEFAULT_GEMINI_LIVE_MODEL,
+        model,
         config: liveConfig,
       },
     },
@@ -91,6 +160,30 @@ export async function createGeminiLiveSessionToken(systemInstruction: string) {
 
   return {
     token: token.name,
-    model: DEFAULT_GEMINI_LIVE_MODEL,
+    model,
+    modelTier,
   };
+}
+
+export async function createGeminiLiveSessionTokenWithFallback(
+  systemInstruction: string,
+): Promise<GeminiLiveSessionToken> {
+  try {
+    return await createGeminiLiveSessionToken(systemInstruction, "primary");
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    if (!isGeminiLiveQuotaOrAvailabilityError(message)) {
+      throw error;
+    }
+
+    console.warn(
+      "[Gemini Live] primary model unavailable, falling back:",
+      PRIMARY_GEMINI_LIVE_MODEL,
+      "→",
+      FALLBACK_GEMINI_LIVE_MODEL,
+      message,
+    );
+
+    return createGeminiLiveSessionToken(systemInstruction, "fallback");
+  }
 }

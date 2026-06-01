@@ -17,9 +17,12 @@ import {
   voiceMessagePlaceholder,
 } from "@/lib/ai/voice-chat-labels";
 import {
+  FALLBACK_GEMINI_LIVE_MODEL,
   GEMINI_LIVE_API_VERSION,
   getLiveAudioTranscriptionConfig,
   getLiveRealtimeInputConfig,
+  isGeminiLiveQuotaOrAvailabilityError,
+  type GeminiLiveModelTier,
 } from "@/lib/ai/gemini-live";
 import {
   arrayBufferToBase64,
@@ -39,7 +42,12 @@ import {
 type LiveSessionResponse = {
   token: string;
   model: string;
+  modelTier?: GeminiLiveModelTier;
 };
+
+function isFallbackLiveSession(payload: LiveSessionResponse): boolean {
+  return payload.modelTier === "fallback" || payload.model === FALLBACK_GEMINI_LIVE_MODEL;
+}
 
 export type VoiceWarning = "transcriptionFailed" | null;
 
@@ -578,7 +586,9 @@ export function useGeminiLiveVoice({
     setSessionMessages([...getChatMessagesRef.current()]);
     resetForNextUserTurn();
 
-    try {
+    const requestLiveSession = async (
+      modelTier?: GeminiLiveModelTier,
+    ): Promise<LiveSessionResponse> => {
       const response = await fetch(`/api/books/${bookId}/live-session`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -586,15 +596,29 @@ export function useGeminiLiveVoice({
           chapterOrder,
           locale,
           selectedText: selectedText?.trim() || undefined,
+          ...(modelTier ? { modelTier } : {}),
         }),
       });
 
       if (!response.ok) {
         const payload = (await response.json().catch(() => null)) as { error?: string } | null;
-        throw new Error(payload?.error ?? "Failed to start live session");
+        const errorMessage = payload?.error ?? "Failed to start live session";
+
+        if (
+          !modelTier &&
+          isGeminiLiveQuotaOrAvailabilityError(errorMessage, response.status)
+        ) {
+          console.warn("[Gemini Live] live-session quota error, requesting fallback model");
+          return requestLiveSession("fallback");
+        }
+
+        throw new Error(errorMessage);
       }
 
-      const sessionPayload = (await response.json()) as LiveSessionResponse;
+      return (await response.json()) as LiveSessionResponse;
+    };
+
+    const connectLiveSession = async (sessionPayload: LiveSessionResponse) => {
       const ai = new GoogleGenAI({
         apiKey: sessionPayload.token,
         httpOptions: { apiVersion: GEMINI_LIVE_API_VERSION },
@@ -607,7 +631,7 @@ export function useGeminiLiveVoice({
       playerRef.current = player;
       await player.resume();
 
-      const session = await ai.live.connect({
+      return ai.live.connect({
         model: sessionPayload.model,
         config: {
           responseModalities: [Modality.AUDIO],
@@ -649,7 +673,9 @@ export function useGeminiLiveVoice({
           },
         },
       });
+    };
 
+    const activateLiveSession = async (session: Session) => {
       if (sessionGeneration !== liveSessionGenerationRef.current) {
         intentionalCloseRef.current = true;
         session.close();
@@ -677,6 +703,35 @@ export function useGeminiLiveVoice({
           },
         });
       });
+    };
+
+    try {
+      let sessionPayload = await requestLiveSession();
+
+      try {
+        const session = await connectLiveSession(sessionPayload);
+        await activateLiveSession(session);
+      } catch (connectError) {
+        const connectMessage =
+          connectError instanceof Error ? connectError.message : String(connectError);
+
+        if (
+          isGeminiLiveQuotaOrAvailabilityError(connectMessage) &&
+          !isFallbackLiveSession(sessionPayload)
+        ) {
+          console.warn(
+            "[Gemini Live] primary connect failed, retrying with fallback model:",
+            connectMessage,
+          );
+          cleanupSession();
+          intentionalCloseRef.current = false;
+          sessionPayload = await requestLiveSession("fallback");
+          const session = await connectLiveSession(sessionPayload);
+          await activateLiveSession(session);
+        } else {
+          throw connectError;
+        }
+      }
     } catch (startError) {
       setSessionMessages(null);
       cleanupSession();

@@ -129,6 +129,7 @@ GEMINI_MODEL=gemini-3.5-flash
 GEMINI_MODEL_FAST=gemini-3.1-flash-lite
 # Optional: Gemini Live voice dialog (AI sidebar)
 # GEMINI_LIVE_MODEL=gemini-3.1-flash-live-preview
+# GEMINI_LIVE_MODEL_FALLBACK=gemini-2.5-flash-native-audio-preview-12-2025
 # User speech in chat is transcribed via GEMINI_MODEL_FAST after each utterance
 
 ### 3. Database

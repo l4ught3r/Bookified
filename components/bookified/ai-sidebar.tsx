@@ -495,57 +495,59 @@ export function AISidebar({
               isMobileLayout ? "w-[min(100vw,380px)]" : "w-[min(100vw,380px)]",
             )}
           >
-            <div
-              className={cn(
-                "flex min-h-0 flex-1 flex-col",
-                showAuthGate && "pointer-events-none select-none blur-[5px]",
-              )}
-            >
-              <header className="relative z-20 shrink-0 border-b border-border/50 p-4">
-                <div className="grid grid-cols-[2.75rem_minmax(0,1fr)_2.75rem] items-center gap-2">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={onToggle}
-                    aria-label={t("hidePanel")}
-                    className="h-11 w-11 shrink-0 justify-self-start rounded-xl"
-                  >
-                    <PanelRightClose className="h-4 w-4 text-muted-foreground" />
-                  </Button>
+            <header className="relative z-40 shrink-0 border-b border-border/50 bg-card p-4">
+              <div className="grid grid-cols-[2.75rem_minmax(0,1fr)_2.75rem] items-center gap-2">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={onToggle}
+                  aria-label={t("hidePanel")}
+                  className="h-11 w-11 shrink-0 justify-self-start rounded-xl"
+                >
+                  <PanelRightClose className="h-4 w-4 text-muted-foreground" />
+                </Button>
 
-                  <div className="flex min-w-0 flex-col items-center text-center">
-                    <div className="flex max-w-full items-center justify-center gap-2">
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                        <Sparkles className="h-4 w-4" aria-hidden />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-foreground">
-                          {t("title")}
-                        </p>
-                        <p className="truncate text-xs text-muted-foreground">{t("subtitle")}</p>
-                      </div>
+                <div className="flex min-w-0 flex-col items-center text-center">
+                  <div className="flex max-w-full items-center justify-center gap-2">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                      <Sparkles className="h-4 w-4" aria-hidden />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-foreground">
+                        {t("title")}
+                      </p>
+                      <p className="truncate text-xs text-muted-foreground">{t("subtitle")}</p>
                     </div>
                   </div>
-
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        onClick={clearChat}
-                        aria-label={t("clearChat")}
-                        className="h-11 w-11 shrink-0 justify-self-end rounded-xl"
-                      >
-                        <Trash2 className="h-4 w-4 text-muted-foreground" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>{t("clearChat")}</TooltipContent>
-                  </Tooltip>
                 </div>
-              </header>
 
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={clearChat}
+                      disabled={showAuthGate}
+                      aria-label={t("clearChat")}
+                      className="h-11 w-11 shrink-0 justify-self-end rounded-xl"
+                    >
+                      <Trash2 className="h-4 w-4 text-muted-foreground" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>{t("clearChat")}</TooltipContent>
+                </Tooltip>
+              </div>
+            </header>
+
+            <div className="relative flex min-h-0 flex-1 flex-col">
+              <div
+                className={cn(
+                  "flex min-h-0 flex-1 flex-col",
+                  showAuthGate && "pointer-events-none select-none blur-[5px]",
+                )}
+              >
               <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-4 pt-4">
                 <div
                   className={cn(
@@ -717,15 +719,16 @@ export function AISidebar({
                     : t("disclaimer")}
                 </p>
               </footer>
-            </div>
+              </div>
 
-            {showAuthGate ? (
-              <AiSidebarAuthGate
-                title={t("signInGateTitle")}
-                description={t("signInGateDescription")}
-                signInLabel={tCommon("signIn")}
-              />
-            ) : null}
+              {showAuthGate ? (
+                <AiSidebarAuthGate
+                  title={t("signInGateTitle")}
+                  description={t("signInGateDescription")}
+                  signInLabel={tCommon("signIn")}
+                />
+              ) : null}
+            </div>
           </div>
         ) : (
           <div className="absolute inset-0 hidden w-11 flex-col items-center gap-3 py-4 lg:flex">
