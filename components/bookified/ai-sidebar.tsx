@@ -502,7 +502,7 @@ export function AISidebar({
                 aria-label={t("placeholder")}
                 disabled={isLoading}
                 rows={1}
-                className="max-h-40 min-h-9 flex-1 resize-none border-0 bg-transparent px-1 py-2 text-sm shadow-none outline-none ring-0 placeholder:text-muted-foreground focus-visible:border-transparent focus-visible:ring-0 focus-visible:ring-offset-0 disabled:opacity-50"
+                className="max-h-40 min-h-9 flex-1 resize-none border-0 bg-transparent px-1 py-2 text-base shadow-none outline-none ring-0 placeholder:text-muted-foreground focus-visible:border-transparent focus-visible:ring-0 focus-visible:ring-offset-0 disabled:opacity-50"
               />
               {hasInput ? (
                 <Button
