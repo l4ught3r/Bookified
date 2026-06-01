@@ -1,23 +1,43 @@
-import { normalizeChapterHref } from "@/lib/books/chapter-href";
+import {
+  normalizeChapterHref,
+  normalizeTocHrefKey,
+  stripEpubHref,
+} from "@/lib/books/chapter-href";
 import { isGenericNavigationTitle, isMeaningfulChapterTitle } from "@/lib/books/navigation-labels";
 
 export function buildTocHrefTitleMap(
   toc: Array<{ title: string; href: string }>,
 ): Map<string, string> {
   const map = new Map<string, string>();
+  const fileFirstTitle = new Set<string>();
 
   for (const item of toc) {
-    const key = normalizeChapterHref(item.href);
     const title = item.title.trim();
-    if (!key || !title || isGenericNavigationTitle(title)) continue;
+    if (!title || isGenericNavigationTitle(title)) continue;
 
-    const existing = map.get(key);
-    if (!existing || title.length > existing.length) {
-      map.set(key, title);
+    const stripped = stripEpubHref(item.href);
+    const fileKey = normalizeChapterHref(stripped);
+    const fullKey = normalizeTocHrefKey(stripped);
+
+    if (fullKey.includes("#") && !map.has(fullKey)) {
+      map.set(fullKey, title);
+    }
+
+    if (fileKey && !fileFirstTitle.has(fileKey)) {
+      fileFirstTitle.add(fileKey);
+      map.set(fileKey, title);
     }
   }
 
   return map;
+}
+
+export function lookupTocTitle(href: string, tocByHref: Map<string, string>): string | undefined {
+  const stripped = stripEpubHref(href);
+  const fullKey = normalizeTocHrefKey(stripped);
+  const fileKey = normalizeChapterHref(stripped);
+
+  return tocByHref.get(fullKey) ?? (fullKey !== fileKey ? tocByHref.get(fileKey) : undefined);
 }
 
 export function resolveChapterTitleFromToc(
@@ -25,7 +45,7 @@ export function resolveChapterTitleFromToc(
   tocByHref: Map<string, string>,
   fallbackTitle: string,
 ): string {
-  const tocTitle = tocByHref.get(normalizeChapterHref(href));
+  const tocTitle = lookupTocTitle(href, tocByHref);
   if (tocTitle && isMeaningfulChapterTitle(tocTitle)) {
     return tocTitle;
   }

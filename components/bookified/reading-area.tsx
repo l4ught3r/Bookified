@@ -7,10 +7,12 @@ import {
   AlignLeft,
   AlignRight,
   Bookmark,
+  BookOpen,
   ChevronLeft,
   ChevronRight,
   ListTree,
   Loader2,
+  Sparkles,
   Type,
 } from "lucide-react";
 import { useLocale, useMessages, useTranslations } from "next-intl";
@@ -62,7 +64,9 @@ import {
 } from "@/lib/books/reading-fonts";
 import {
   DEFAULT_READING_TYPOGRAPHY,
+  getPlatformDefaultReadingTypography,
   isBookOriginalFont,
+  MOBILE_DEFAULT_READING_FONT_SIZE,
   normalizeReadingTypography,
   resolveReadingFontFamily,
   type ReadingTypographySettings,
@@ -107,6 +111,12 @@ interface ReadingAreaProps {
   canGoPrev?: boolean;
   canGoNext?: boolean;
   typography?: ReadingTypographySettings | null;
+  mobileSidebarChrome?: {
+    leftSidebarOpen: boolean;
+    rightSidebarOpen: boolean;
+    onOpenLeftSidebar: () => void;
+    onOpenRightSidebar: () => void;
+  };
 }
 
 export function ReadingArea({
@@ -124,6 +134,7 @@ export function ReadingArea({
   onNextChapter,
   canGoPrev = false,
   canGoNext = false,
+  mobileSidebarChrome,
 }: ReadingAreaProps) {
   const t = useTranslations("reader");
   const locale = useLocale();
@@ -134,9 +145,13 @@ export function ReadingArea({
     (locale === "ru" ? "Исходный шрифт" : "Original typeface");
   const prefersReducedMotion = usePrefersReducedMotion();
   const isMobileLayout = useIsMobileLayout();
+  const platformDefaultTypography = useMemo(
+    () => getPlatformDefaultReadingTypography(isMobileLayout),
+    [isMobileLayout],
+  );
   const bookTypography = useMemo(
-    () => normalizeReadingTypography(typography ?? DEFAULT_READING_TYPOGRAPHY),
-    [typography],
+    () => normalizeReadingTypography(typography ?? platformDefaultTypography),
+    [typography, platformDefaultTypography],
   );
 
   const storedTypography = useSyncExternalStore(
@@ -145,10 +160,26 @@ export function ReadingArea({
     () => null,
   );
 
-  const activeTypography = useMemo(
-    () => mergeReadingTypographyWithStored(bookTypography, storedTypography),
-    [bookTypography, storedTypography],
-  );
+  const activeTypography = useMemo(() => {
+    const merged = mergeReadingTypographyWithStored(bookTypography, storedTypography);
+
+    if (!isMobileLayout || storedTypography != null) {
+      return merged;
+    }
+
+    const bookFontSize = typography?.fontSize;
+    const usesBookFontSize =
+      bookFontSize != null && bookFontSize !== DEFAULT_READING_TYPOGRAPHY.fontSize;
+
+    if (usesBookFontSize) {
+      return merged;
+    }
+
+    return normalizeReadingTypography({
+      ...merged,
+      fontSize: MOBILE_DEFAULT_READING_FONT_SIZE,
+    });
+  }, [bookTypography, storedTypography, isMobileLayout, typography?.fontSize]);
 
   const updateTypography = useCallback(
     (patch: Partial<StoredReadingTypographySettings>) => {
@@ -399,20 +430,18 @@ export function ReadingArea({
       scrollPersistReadyRef.current = true;
       updateScrollMetrics();
 
-      if (isMobileLayout) {
-        const scrollTopValue = container.scrollTop;
-        const delta = scrollTopValue - lastScrollTopRef.current;
+      const scrollTopValue = container.scrollTop;
+      const delta = scrollTopValue - lastScrollTopRef.current;
 
-        if (scrollTopValue <= 8) {
-          setReaderUi((prev) => ({ ...prev, chromeVisible: true }));
-        } else if (delta > 6) {
-          setReaderUi((prev) => ({ ...prev, chromeVisible: false }));
-        } else if (delta < -6) {
-          setReaderUi((prev) => ({ ...prev, chromeVisible: true }));
-        }
-
-        lastScrollTopRef.current = scrollTopValue;
+      if (scrollTopValue <= 8) {
+        setReaderUi((prev) => ({ ...prev, chromeVisible: true }));
+      } else if (delta > 6) {
+        setReaderUi((prev) => ({ ...prev, chromeVisible: false }));
+      } else if (delta < -6) {
+        setReaderUi((prev) => ({ ...prev, chromeVisible: true }));
       }
+
+      lastScrollTopRef.current = scrollTopValue;
 
       if (timeout) clearTimeout(timeout);
       timeout = setTimeout(persistScroll, 150);
@@ -451,7 +480,7 @@ export function ReadingArea({
       resizeObserver.disconnect();
       container.removeEventListener("scroll", handleScroll);
     };
-  }, [bookId, chapter?.order, isMobileLayout]);
+  }, [bookId, chapter?.order]);
 
   const scrollToBookmarkPosition = useCallback((anchorScrollTop: number) => {
     const container = contentRef.current;
@@ -578,6 +607,292 @@ export function ReadingArea({
     [fontWeightBold],
   );
 
+  const useMobileTopChrome = isMobileLayout && mobileSidebarChrome != null;
+
+  const readerChromeActions = (
+    <>
+      <Popover
+        open={typographyOpen}
+        onOpenChange={(open) => setReaderUi((prev) => ({ ...prev, typographyOpen: open }))}
+      >
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <PopoverTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-10 w-10 shrink-0 rounded-xl hover:bg-secondary sm:h-11 sm:w-11"
+                aria-label={t("readingSettings")}
+              >
+                <Type className="h-4 w-4" />
+              </Button>
+            </PopoverTrigger>
+          </TooltipTrigger>
+
+          <TooltipContent>{t("readingSettings")}</TooltipContent>
+        </Tooltip>
+        <PopoverContent
+          className={cn(
+            "rounded-xl border-border/50",
+            isMobileLayout
+              ? "w-[calc(100vw-1rem)] max-w-md overflow-hidden p-2.5"
+              : "max-h-[min(72dvh,32rem)] w-[min(calc(100vw-2rem),20rem)] overflow-y-auto rounded-sm p-4",
+          )}
+          align={isMobileLayout ? "center" : "end"}
+          side={isMobileLayout ? "bottom" : "bottom"}
+          sideOffset={isMobileLayout ? 10 : 8}
+          collisionPadding={12}
+        >
+          <div className={cn(isMobileLayout ? "space-y-2" : "space-y-5")}>
+            <div className={cn(isMobileLayout ? "space-y-0" : "space-y-2")}>
+              <div className="flex items-center gap-2">
+                <Select
+                  value={selectedFontId}
+                  onValueChange={(value) => updateTypography({ fontId: value })}
+                  onOpenChange={(open) => {
+                    if (open) preloadPickerFonts();
+                  }}
+                >
+                  <SelectTrigger
+                    size="default"
+                    className={cn(
+                      "w-full rounded-sm border-border/50 bg-secondary/50",
+                      isMobileLayout && "h-9",
+                    )}
+                    style={{ fontFamily: selectedFontPreviewFamily }}
+                  >
+                    <span
+                      className="text-sm font-medium pl-2"
+                      style={{ fontFamily: "var(--font-geist-sans)" }}
+                    >
+                      {t("font")}
+                    </span>
+                    <div className="mx-2 h-5 w-px border-r-2 bg-border" />
+                    <SelectValue placeholder={t("fontPlaceholder")} />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-none overflow-visible rounded-sm **:data-[slot=select-scroll-down-button]:hidden **:data-[slot=select-scroll-up-button]:hidden">
+                    <SelectGroup>
+                      {fontPickerOptions.map((font) => (
+                        <SelectItem
+                          key={font.id}
+                          value={font.id}
+                          style={{
+                            fontFamily:
+                              font.id === BOOK_ORIGINAL_FONT_ID && bookTypography.customFontFamily
+                                ? `"${bookTypography.customFontFamily.replace(/"/g, "")}"`
+                                : font.family,
+                          }}
+                          className="text-sm font-medium px-4"
+                        >
+                          {font.name}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className={cn(isMobileLayout ? "space-y-0" : "space-y-2")}>
+              {!isMobileLayout ? (
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">{t("fontSize")}</span>
+                </div>
+              ) : null}
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined shrink-0 text-[1.125rem]" aria-hidden>
+                  format_size
+                </span>
+                <Slider
+                  value={[fontSize]}
+                  onValueChange={([value]) => updateTypography({ fontSize: value })}
+                  min={12}
+                  max={28}
+                  step={1}
+                  className="flex-1"
+                  aria-label={t("fontSize")}
+                />
+                <span className="w-9 shrink-0 text-right tabular-nums text-xs text-muted-foreground sm:w-10 sm:text-sm">
+                  {fontSize.toFixed(0)}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex min-w-0 items-center gap-2">
+                <span className="material-symbols-outlined shrink-0 text-[1.125rem]">
+                  format_bold
+                </span>
+                <span className={cn("font-medium", isMobileLayout ? "text-xs" : "text-sm")}>
+                  {t("boldFont")}
+                </span>
+              </div>
+              <Switch
+                checked={fontWeightBold}
+                onCheckedChange={(checked) => updateTypography({ fontWeightBold: checked })}
+                aria-label={t("boldFont")}
+              />
+            </div>
+
+            <div className={cn(isMobileLayout ? "space-y-0" : "space-y-2")}>
+              {!isMobileLayout ? (
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">{t("lineHeight")}</span>
+                </div>
+              ) : null}
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined shrink-0 text-[1.125rem]" aria-hidden>
+                  format_line_spacing
+                </span>
+
+                <Slider
+                  value={[lineHeight * 10]}
+                  onValueChange={([value]) => updateTypography({ lineHeight: value / 10 })}
+                  min={12.0}
+                  max={20.0}
+                  step={0.5}
+                  className="flex-1"
+                  aria-label={t("lineHeight")}
+                />
+
+                <span className="w-9 shrink-0 text-right tabular-nums text-xs text-muted-foreground sm:w-10 sm:text-sm">
+                  {lineHeight.toFixed(2)}
+                </span>
+              </div>
+            </div>
+
+            <div className={cn(isMobileLayout ? "space-y-0" : "space-y-2")}>
+              {!isMobileLayout ? (
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">{t("letterSpacing")}</span>
+                </div>
+              ) : null}
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined shrink-0 text-[1.125rem]" aria-hidden>
+                  format_letter_spacing_2
+                </span>
+
+                <Slider
+                  value={[letterSpacing * 10 + 10]}
+                  onValueChange={([value]) =>
+                    updateTypography({ letterSpacing: (value - 10) / 10 })
+                  }
+                  min={0}
+                  max={20}
+                  step={1}
+                  className="flex-1"
+                  aria-label={t("letterSpacing")}
+                />
+                <span className="w-9 shrink-0 text-right tabular-nums text-xs text-muted-foreground sm:w-10 sm:text-sm">
+                  {(letterSpacing * 10).toFixed(0)} %
+                </span>
+              </div>
+            </div>
+
+            <div className={cn(isMobileLayout ? "space-y-0" : "space-y-2")}>
+              {!isMobileLayout ? (
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">{t("wordSpacing")}</span>
+                </div>
+              ) : null}
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined shrink-0 text-[1.125rem]" aria-hidden>
+                  format_letter_spacing
+                </span>
+                <Slider
+                  value={[wordSpacing + 10]}
+                  onValueChange={([value]) => updateTypography({ wordSpacing: value - 10 })}
+                  min={0}
+                  max={20}
+                  step={1}
+                  className="flex-1"
+                  aria-label={t("wordSpacing")}
+                />
+                <span className="w-9 shrink-0 text-right tabular-nums text-xs text-muted-foreground sm:w-10 sm:text-sm">
+                  {wordSpacing.toFixed(0)}%
+                </span>
+              </div>
+            </div>
+
+            <div className={cn(isMobileLayout ? "flex items-center gap-2" : "space-y-1")}>
+              {!isMobileLayout ? (
+                <span className="flex text-center text-sm font-medium">{t("alignment")}</span>
+              ) : null}
+
+              <div
+                className={cn(
+                  "flex gap-0.5",
+                  isMobileLayout ? "flex-1 justify-center pt-0" : "justify-center pt-0.5",
+                )}
+              >
+                {[
+                  { value: "justify" as const, icon: AlignJustify, label: t("alignJustify") },
+                  { value: "center" as const, icon: AlignCenter, label: t("alignCenter") },
+                  { value: "left" as const, icon: AlignLeft, label: t("alignLeft") },
+                  { value: "right" as const, icon: AlignRight, label: t("alignRight") },
+                ].map(({ value, icon: Icon, label }) => (
+                  <Button
+                    key={value}
+                    variant={textAlign === value ? "secondary" : "ghost"}
+                    size="icon"
+                    className={cn("rounded-lg", isMobileLayout ? "h-9 w-9" : "h-11 w-11")}
+                    onClick={() => updateTypography({ textAlign: value })}
+                    aria-label={label}
+                    aria-pressed={textAlign === value}
+                  >
+                    <Icon className="h-4 w-4" />
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            <Button
+              variant="outline"
+              size="sm"
+              className={cn("w-full rounded-lg", isMobileLayout && "h-9")}
+              onClick={resetTypography}
+            >
+              {t("resetSettings")}
+            </Button>
+          </div>
+        </PopoverContent>
+      </Popover>
+
+      {!useMobileTopChrome ? <div className="mx-1 hidden h-5 w-px bg-border sm:block" /> : null}
+
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-10 w-10 shrink-0 rounded-xl sm:h-11 sm:w-11"
+            onClick={() => setReaderUi((prev) => ({ ...prev, contentsOpen: true }))}
+            aria-label={t("tableOfContents")}
+          >
+            <ListTree className="h-4 w-4" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>{t("tableOfContents")}</TooltipContent>
+      </Tooltip>
+
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant={isBookmarkedHere ? "secondary" : "ghost"}
+            size="icon"
+            className="h-10 w-10 shrink-0 rounded-xl sm:h-11 sm:w-11"
+            onClick={handleToggleBookmark}
+            aria-label={t("bookmarkToggle")}
+            aria-pressed={isBookmarkedHere}
+          >
+            <Bookmark className={cn("h-4 w-4", isBookmarkedHere && "fill-primary text-primary")} />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>{t("bookmarkToggle")}</TooltipContent>
+      </Tooltip>
+    </>
+  );
+
   return (
     <TooltipProvider>
       <div className="relative flex h-full flex-1 flex-col bg-reading-bg">
@@ -588,281 +903,59 @@ export function ReadingArea({
           />
         </div>
 
-        <div
-          className={cn(
-            "z-20 flex max-w-[calc(100%-1rem)] items-center gap-0.5 overflow-x-auto rounded-2xl border border-border/50 bg-card p-1 shadow-sm transition-[opacity,transform] duration-300 ease-in-out motion-reduce:transition-none sm:gap-1 sm:p-1.5",
-            isMobileLayout
-              ? "fixed right-3 top-(--reader-floating-chrome-top,calc(env(safe-area-inset-top)+7.75rem)) sm:right-4"
-              : "absolute right-2 top-3 sm:right-5 sm:top-4",
-            readerChromeVisible ? "opacity-100" : "opacity-0",
-          )}
-        >
-          <Popover
-            open={typographyOpen}
-            onOpenChange={(open) => setReaderUi((prev) => ({ ...prev, typographyOpen: open }))}
+        {useMobileTopChrome ? (
+          <div
+            className={cn(
+              "fixed inset-x-0 z-20 flex items-center justify-between gap-2 border-b border-border/40 bg-card px-3 py-2 transition-[opacity,transform] duration-300 ease-in-out motion-reduce:transition-none lg:hidden",
+              "top-[calc(env(safe-area-inset-top)+3.5rem)]",
+              readerChromeVisible ? "translate-y-0 opacity-100" : "pointer-events-none opacity-0",
+            )}
           >
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-10 w-10 shrink-0 rounded-xl hover:bg-secondary sm:h-11 sm:w-11"
-                    aria-label={t("readingSettings")}
-                  >
-                    <Type className="h-4 w-4" />
-                  </Button>
-                </PopoverTrigger>
-              </TooltipTrigger>
-
-              <TooltipContent>{t("readingSettings")}</TooltipContent>
-            </Tooltip>
-            <PopoverContent
-              className={cn(
-                "overflow-y-auto rounded-xl border-border/50",
-                isMobileLayout
-                  ? "max-h-[min(72dvh,32rem)] w-[calc(100vw-1.25rem)] max-w-md p-3"
-                  : "w-[min(calc(100vw-2rem),20rem)] rounded-sm p-4",
-              )}
-              align={isMobileLayout ? "center" : "end"}
-              side={isMobileLayout ? "bottom" : "bottom"}
-              sideOffset={isMobileLayout ? 10 : 8}
-              collisionPadding={12}
+            <Button
+              type="button"
+              variant={mobileSidebarChrome.leftSidebarOpen ? "secondary" : "outline"}
+              size="icon"
+              className="h-10 w-10 shrink-0 rounded-xl"
+              onClick={mobileSidebarChrome.onOpenLeftSidebar}
+              aria-expanded={mobileSidebarChrome.leftSidebarOpen}
+              aria-label={t("showLibrary")}
             >
-              <div className={cn(isMobileLayout ? "space-y-4" : "space-y-5")}>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between"></div>
-                  <div className="flex items-center gap-2">
-                    <Select
-                      value={selectedFontId}
-                      onValueChange={(value) => updateTypography({ fontId: value })}
-                      onOpenChange={(open) => {
-                        if (open) preloadPickerFonts();
-                      }}
-                    >
-                      <SelectTrigger
-                        size="default"
-                        className="w-full rounded-sm border-border/50 bg-secondary/50"
-                        style={{ fontFamily: selectedFontPreviewFamily }}
-                      >
-                        <span
-                          className="text-sm font-medium pl-2"
-                          style={{ fontFamily: "var(--font-geist-sans)" }}
-                        >
-                          {t("font")}
-                        </span>
-                        <div className="mx-2 h-5 w-px border-r-2 bg-border" />
-                        <SelectValue placeholder={t("fontPlaceholder")} />
-                      </SelectTrigger>
-                      <SelectContent className="max-h-none overflow-visible rounded-sm **:data-[slot=select-scroll-down-button]:hidden **:data-[slot=select-scroll-up-button]:hidden">
-                        <SelectGroup>
-                          {fontPickerOptions.map((font) => (
-                            <SelectItem
-                              key={font.id}
-                              value={font.id}
-                              style={{
-                                fontFamily:
-                                  font.id === BOOK_ORIGINAL_FONT_ID &&
-                                  bookTypography.customFontFamily
-                                    ? `"${bookTypography.customFontFamily.replace(/"/g, "")}"`
-                                    : font.family,
-                              }}
-                              className="text-sm font-medium px-4"
-                            >
-                              {font.name}
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
+              <BookOpen className="h-4 w-4 shrink-0" aria-hidden />
+            </Button>
 
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">{t("fontSize")}</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="material-symbols-outlined" aria-hidden>
-                      format_size
-                    </span>
-                    <Slider
-                      value={[fontSize]}
-                      onValueChange={([value]) => updateTypography({ fontSize: value })}
-                      min={12}
-                      max={28}
-                      step={1}
-                      className="flex-1"
-                      aria-label={t("fontSize")}
-                    />
-                    <span className="w-10 text-right tabular-nums text-sm text-muted-foreground">
-                      {fontSize.toFixed(0)}
-                    </span>
-                  </div>
-                </div>
+            <div className="flex min-w-0 flex-1 items-center justify-center gap-0.5">
+              {readerChromeActions}
+            </div>
 
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-2">
-                    <span className="material-symbols-outlined">format_bold</span>
-                    <span className="text-sm font-medium">{t("boldFont")}</span>
-                  </div>
-                  <Switch
-                    checked={fontWeightBold}
-                    onCheckedChange={(checked) => updateTypography({ fontWeightBold: checked })}
-                    aria-label={t("boldFont")}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">{t("lineHeight")}</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="material-symbols-outlined" aria-hidden>
-                      format_line_spacing
-                    </span>
-
-                    <Slider
-                      value={[lineHeight * 10]}
-                      onValueChange={([value]) => updateTypography({ lineHeight: value / 10 })}
-                      min={12.0}
-                      max={20.0}
-                      step={0.5}
-                      className="flex-1"
-                      aria-label={t("lineHeight")}
-                    />
-
-                    <span className="w-10 text-right tabular-nums text-sm text-muted-foreground">
-                      {lineHeight.toFixed(2)}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">{t("letterSpacing")}</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="material-symbols-outlined" aria-hidden>
-                      format_letter_spacing_2
-                    </span>
-
-                    <Slider
-                      value={[letterSpacing * 10 + 10]}
-                      onValueChange={([value]) =>
-                        updateTypography({ letterSpacing: (value - 10) / 10 })
-                      }
-                      min={0}
-                      max={20}
-                      step={1}
-                      className="flex-1"
-                      aria-label={t("letterSpacing")}
-                    />
-                    <span className="w-10 text-right tabular-nums text-sm text-muted-foreground">
-                      {(letterSpacing * 10).toFixed(0)} %
-                    </span>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">{t("wordSpacing")}</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="material-symbols-outlined" aria-hidden>
-                      format_letter_spacing
-                    </span>
-                    <Slider
-                      value={[wordSpacing + 10]}
-                      onValueChange={([value]) => updateTypography({ wordSpacing: value - 10 })}
-                      min={0}
-                      max={20}
-                      step={1}
-                      className="flex-1"
-                      aria-label={t("wordSpacing")}
-                    />
-                    <span className="w-10 text-right tabular-nums text-sm text-muted-foreground">
-                      {wordSpacing.toFixed(0)}%
-                    </span>
-                  </div>
-                </div>
-
-                <div className="space-y-1">
-                  <span className="flex text-center text-sm font-medium">{t("alignment")}</span>
-
-                  <div className="flex gap-0.5 pt-0.5">
-                    {[
-                      { value: "justify" as const, icon: AlignJustify, label: t("alignJustify") },
-                      { value: "center" as const, icon: AlignCenter, label: t("alignCenter") },
-                      { value: "left" as const, icon: AlignLeft, label: t("alignLeft") },
-                      { value: "right" as const, icon: AlignRight, label: t("alignRight") },
-                    ].map(({ value, icon: Icon, label }) => (
-                      <Button
-                        key={value}
-                        variant={textAlign === value ? "secondary" : "ghost"}
-                        size="icon"
-                        className="h-11 w-11 rounded-lg"
-                        onClick={() => updateTypography({ textAlign: value })}
-                        aria-label={label}
-                        aria-pressed={textAlign === value}
-                      >
-                        <Icon className="h-4 w-4" />
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full rounded-lg"
-                  onClick={resetTypography}
-                >
-                  {t("resetSettings")}
-                </Button>
-              </div>
-            </PopoverContent>
-          </Popover>
-
-          <div className="mx-1 hidden h-5 w-px bg-border sm:block" />
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-10 w-10 shrink-0 rounded-xl sm:h-11 sm:w-11"
-                onClick={() => setReaderUi((prev) => ({ ...prev, contentsOpen: true }))}
-                aria-label={t("tableOfContents")}
-              >
-                <ListTree className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>{t("tableOfContents")}</TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant={isBookmarkedHere ? "secondary" : "ghost"}
-                size="icon"
-                className="h-10 w-10 shrink-0 rounded-xl sm:h-11 sm:w-11"
-                onClick={handleToggleBookmark}
-                aria-label={t("bookmarkToggle")}
-                aria-pressed={isBookmarkedHere}
-              >
-                <Bookmark
-                  className={cn("h-4 w-4", isBookmarkedHere && "fill-primary text-primary")}
-                />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>{t("bookmarkToggle")}</TooltipContent>
-          </Tooltip>
-        </div>
+            <Button
+              type="button"
+              variant={mobileSidebarChrome.rightSidebarOpen ? "secondary" : "outline"}
+              size="icon"
+              className="h-10 w-10 shrink-0 rounded-xl"
+              onClick={mobileSidebarChrome.onOpenRightSidebar}
+              aria-expanded={mobileSidebarChrome.rightSidebarOpen}
+              aria-label={t("askAi")}
+            >
+              <Sparkles className="h-4 w-4 shrink-0" aria-hidden />
+            </Button>
+          </div>
+        ) : (
+          <div
+            className={cn(
+              "absolute right-2 top-3 z-20 flex max-w-[calc(100%-1rem)] items-center gap-0.5 overflow-x-auto rounded-2xl border border-border/50 bg-card p-1 shadow-sm transition-[opacity,transform] duration-300 ease-in-out motion-reduce:transition-none sm:right-5 sm:top-4 sm:gap-1 sm:p-1.5",
+              readerChromeVisible ? "translate-y-0 opacity-100" : "pointer-events-none  opacity-0",
+            )}
+          >
+            {readerChromeActions}
+          </div>
+        )}
 
         <div
           ref={contentRef}
-          className="flex-1 overflow-y-auto px-4 py-10 pt-12 sm:px-6 sm:py-12 sm:pt-16 md:px-8 lg:px-24"
+          className={cn(
+            "flex-1 overflow-y-auto px-4 py-10 sm:px-6 sm:py-12 md:px-8 lg:px-24",
+            useMobileTopChrome ? "pt-14 sm:pt-12" : "pt-12 sm:pt-16",
+          )}
         >
           {showLoading ? (
             <div className="flex h-full flex-col items-center justify-center gap-3 text-muted-foreground">

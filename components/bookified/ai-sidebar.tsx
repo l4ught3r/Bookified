@@ -4,25 +4,20 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import {
-  BookOpen,
+  ArrowUp,
   Check,
   Copy,
-  MoreHorizontal,
+  Mic,
   PanelRightClose,
   RefreshCw,
-  Send,
   Sparkles,
+  Square,
   Trash2,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Textarea } from "@/components/ui/textarea";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import type { AiChatLocale } from "@/lib/ai/book-context";
 import {
   getUiMessageText,
@@ -150,8 +145,10 @@ export function AISidebar({
   const [prevInitialPrompt, setPrevInitialPrompt] = useState(initialPrompt);
   const [localError, setLocalError] = useState<string | null>(null);
   const [lastFailedUserMessage, setLastFailedUserMessage] = useState<string | null>(null);
+  const [isListening, setIsListening] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const recognitionRef = useRef<{ stop: () => void } | null>(null);
 
   if (initialPrompt !== prevInitialPrompt) {
     setPrevInitialPrompt(initialPrompt);
@@ -185,9 +182,10 @@ export function AISidebar({
   const showSuggestedPrompts = showGreeting && !isLoading && !errorMessage;
 
   useEffect(() => {
-    if (!initialPrompt || !isOpen) return;
-    textareaRef.current?.focus();
-  }, [initialPrompt, isOpen]);
+    return () => {
+      recognitionRef.current?.stop();
+    };
+  }, []);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({
@@ -195,11 +193,20 @@ export function AISidebar({
     });
   }, [visibleMessages, showGreeting, prefersReducedMotion, isLoading, errorMessage]);
 
+  useEffect(() => {
+    if (!initialPrompt || !isOpen) return;
+    textareaRef.current?.focus();
+  }, [initialPrompt, isOpen]);
+
+  const hasInput = inputValue.trim().length > 0;
+
   const handleSend = async () => {
     const trimmed = inputValue.trim();
     if (!trimmed || isLoading) {
       return;
     }
+
+    recognitionRef.current?.stop();
 
     if (!bookId) {
       setLocalError(t("errorGeneric"));
@@ -284,7 +291,69 @@ export function AISidebar({
     textareaRef.current?.focus();
   };
 
+  const handleVoiceInput = () => {
+    if (isListening) {
+      recognitionRef.current?.stop();
+      return;
+    }
+
+    type SpeechRecognitionInstance = {
+      lang: string;
+      interimResults: boolean;
+      continuous: boolean;
+      onresult: ((event: { results: SpeechRecognitionResultList }) => void) | null;
+      onerror: (() => void) | null;
+      onend: (() => void) | null;
+      start: () => void;
+      stop: () => void;
+    };
+
+    type SpeechRecognitionCtor = new () => SpeechRecognitionInstance;
+
+    const win = window as Window & {
+      SpeechRecognition?: SpeechRecognitionCtor;
+      webkitSpeechRecognition?: SpeechRecognitionCtor;
+    };
+
+    const SpeechRecognition = win.SpeechRecognition ?? win.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = locale === "ru" ? "ru-RU" : "en-US";
+    recognition.interimResults = false;
+    recognition.continuous = false;
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0]?.[0]?.transcript?.trim();
+      if (!transcript) {
+        return;
+      }
+
+      setTypedInput((current) => {
+        const base = current ?? (initialPrompt ? t("fragmentPrefix", { text: initialPrompt }) : "");
+        return base ? `${base} ${transcript}` : transcript;
+      });
+    };
+
+    recognition.onerror = () => {
+      setIsListening(false);
+      recognitionRef.current = null;
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+      recognitionRef.current = null;
+    };
+
+    recognitionRef.current = recognition;
+    setIsListening(true);
+    recognition.start();
+  };
+
   const clearChat = () => {
+    recognitionRef.current?.stop();
     void stop();
     clearError();
     setLocalError(null);
@@ -311,7 +380,7 @@ export function AISidebar({
 
       <aside
         className={cn(
-          "relative flex h-full shrink-0 flex-col overflow-hidden border-l border-sidebar-border bg-sidebar text-sidebar-foreground",
+          "relative flex h-full shrink-0 flex-col overflow-hidden border-l border-border/50 bg-card",
           isMobileLayout
             ? isOpen
               ? "fixed inset-y-0 right-0 z-50 w-[min(100vw,380px)] shadow-xl lg:static lg:z-auto lg:w-[min(100vw,380px)] lg:shadow-none"
@@ -330,90 +399,74 @@ export function AISidebar({
               isMobileLayout ? "w-[min(100vw,380px)]" : "w-[min(100vw,380px)]",
             )}
           >
-          <header className="shrink-0 border-b border-sidebar-border bg-sidebar-accent/40 px-3 py-2">
+          <header className="relative z-20 shrink-0 border-b border-border/50 p-4">
             <div className="flex items-start gap-2">
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-sm"
-                onClick={onToggle}
-                aria-label={t("hidePanel")}
-                className="mt-0.5 shrink-0 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-              >
-                <PanelRightClose className="h-4 w-4" />
-              </Button>
-
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-sidebar-primary/15 text-sidebar-primary">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                     <Sparkles className="h-4 w-4" aria-hidden />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-sidebar-primary">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-foreground">
                       {t("title")}
                     </p>
-                    <p className="text-xs text-sidebar-foreground/70">{t("subtitle")}</p>
+                    <p className="text-xs text-muted-foreground">{t("subtitle")}</p>
                   </div>
                 </div>
               </div>
 
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
+              <Tooltip>
+                <TooltipTrigger asChild>
                   <Button
+                    type="button"
                     variant="ghost"
-                    size="icon-sm"
-                    className="shrink-0 rounded-lg"
-                    aria-label={t("moreActions")}
+                    size="icon"
+                    onClick={clearChat}
+                    aria-label={t("clearChat")}
+                    className="h-11 w-11 shrink-0 rounded-xl"
                   >
-                    <MoreHorizontal className="h-4 w-4" />
+                    <Trash2 className="h-4 w-4 text-muted-foreground" />
                   </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="rounded-lg">
-                  <DropdownMenuItem onClick={clearChat} className="rounded-md">
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    {t("clearChat")}
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
+                </TooltipTrigger>
+                <TooltipContent>{t("clearChat")}</TooltipContent>
+              </Tooltip>
 
-            {hasBookContext ? (
-              <div className="mt-2 w-full rounded-xl border border-sidebar-border bg-sidebar px-2 py-2">
-                <div className="flex items-start gap-2">
-                  <BookOpen
-                    className="mt-0.5 h-3.5 w-3.5 shrink-0 text-sidebar-primary"
-                    aria-hidden
-                  />
-                  <div className="min-w-0 flex-1">
-                    <p className="line-clamp-2 text-sm font-semibold leading-snug text-sidebar-foreground">
-                      {bookTitle}
-                    </p>
-                    <p className="line-clamp-2 text-sm leading-snug text-sidebar-foreground/90">
-                      {t("chapterLabel")}: {chapterTitle?.trim() || t("noChapterSelected")}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <p className="mt-2.5 w-full rounded-xl border border-dashed border-sidebar-border px-3 py-2.5 text-sm text-sidebar-foreground/65">
-                {t("subtitle")}
-              </p>
-            )}
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={onToggle}
+                aria-label={t("hidePanel")}
+                className="h-11 w-11 shrink-0 rounded-xl"
+              >
+                <PanelRightClose className="h-4 w-4 text-muted-foreground" />
+              </Button>
+            </div>
           </header>
 
-          <div className="min-h-0 flex-1 overflow-y-auto px-3 py-4">
-            <div className="space-y-4">
-              {showGreeting ? <GreetingBlock content={greetingText} /> : null}
-
-              {visibleMessages.map((message) => (
-                <MessageBlock
-                  key={message.id}
-                  message={message}
-                  isStreaming={isUiMessageStreaming(message)}
-                  regenerateDisabled={isLoading}
-                  onRegenerate={handleRegenerate}
-                />
-              ))}
+          <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-4 pt-4">
+            <div className={cn("flex flex-col", showGreeting && "min-h-full")}>
+              {showGreeting ? (
+                <div className="flex flex-1 flex-col items-center justify-center px-2 py-10 text-center">
+                  <EmptyGreeting
+                    content={greetingText}
+                    suggestedPrompts={showSuggestedPrompts ? suggestedPrompts : undefined}
+                    onSuggestedPrompt={handleSuggestedPrompt}
+                  />
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {visibleMessages.map((message) => (
+                    <MessageBlock
+                      key={message.id}
+                      message={message}
+                      isStreaming={isUiMessageStreaming(message)}
+                      regenerateDisabled={isLoading}
+                      onRegenerate={handleRegenerate}
+                    />
+                  ))}
+                </div>
+              )}
 
               {isLoading && !hasStreamStarted ? <ThinkingBubble label={t("thinking")} /> : null}
 
@@ -438,26 +491,8 @@ export function AISidebar({
             </div>
           </div>
 
-          {showSuggestedPrompts ? (
-            <div className="shrink-0 border-t border-sidebar-border px-3 py-3">
-              <p className="mb-2 text-xs font-medium text-sidebar-foreground/65">{t("tryAsking")}</p>
-              <div className="flex flex-wrap gap-2">
-                {suggestedPrompts.map((item) => (
-                  <button
-                    key={item.label}
-                    type="button"
-                    onClick={() => handleSuggestedPrompt(item.prompt)}
-                    className="min-h-10 rounded-full border border-sidebar-border bg-sidebar-accent px-3 py-1.5 text-left text-xs font-medium text-sidebar-accent-foreground transition-colors hover:border-sidebar-primary/40 hover:bg-sidebar-primary/10"
-                  >
-                    {item.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          ) : null}
-
-          <footer className="shrink-0 border-t border-sidebar-border bg-sidebar-accent/30 p-3">
-            <div className="flex items-stretch gap-2 rounded-xl border border-sidebar-border bg-sidebar p-1.5 shadow-sm">
+          <footer className="shrink-0 p-4 pt-0">
+            <div className="flex items-end gap-1 rounded-[1.75rem] border border-border/40 bg-secondary/60 px-3 py-2 shadow-sm">
               <Textarea
                 ref={textareaRef}
                 value={inputValue}
@@ -466,21 +501,43 @@ export function AISidebar({
                 placeholder={t("placeholder")}
                 aria-label={t("placeholder")}
                 disabled={isLoading}
-                rows={2}
-                className="max-h-32 min-h-[52px] flex-1 resize-none border-0 bg-transparent px-2 py-1.5 text-sm text-sidebar-foreground shadow-none placeholder:text-sidebar-foreground/50 focus-visible:ring-sidebar-ring/50"
+                rows={1}
+                className="max-h-40 min-h-9 flex-1 resize-none border-0 bg-transparent px-1 py-2 text-sm shadow-none outline-none ring-0 placeholder:text-muted-foreground focus-visible:border-transparent focus-visible:ring-0 focus-visible:ring-offset-0 disabled:opacity-50"
               />
-              <Button
-                onClick={() => void handleSend()}
-                disabled={!inputValue.trim() || isLoading}
-                size="icon"
-                aria-label={t("send")}
-                title={t("send")}
-                className="h-auto min-h-[52px] min-w-[52px] w-11 shrink-0 self-stretch rounded-lg bg-sidebar-primary text-sidebar-primary-foreground hover:bg-sidebar-primary/90"
-              >
-                <Send className="h-4 w-4" />
-              </Button>
+              {hasInput ? (
+                <Button
+                  type="button"
+                  onClick={() => void handleSend()}
+                  disabled={isLoading}
+                  size="icon"
+                  aria-label={t("send")}
+                  className="mb-0.5 h-9 w-9 shrink-0 rounded-full bg-primary text-primary-foreground hover:bg-primary/90"
+                >
+                  <ArrowUp className="h-4 w-4" strokeWidth={2.5} />
+                </Button>
+              ) : (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleVoiceInput}
+                  disabled={isLoading}
+                  aria-label={isListening ? t("stopRecording") : t("voiceInput")}
+                  aria-pressed={isListening}
+                  className={cn(
+                    "mb-0.5 h-9 w-9 shrink-0 rounded-full text-muted-foreground hover:bg-secondary hover:text-foreground",
+                    isListening && "text-primary",
+                  )}
+                >
+                  {isListening ? (
+                    <Square className="h-3.5 w-3.5 fill-current" aria-hidden />
+                  ) : (
+                    <Mic className="h-4 w-4" aria-hidden />
+                  )}
+                </Button>
+              )}
             </div>
-            <p className="mt-2 px-1 text-[11px] leading-relaxed text-sidebar-foreground/60">
+            <p className="mt-2 px-1 text-center text-[11px] leading-relaxed text-muted-foreground">
               {t("disclaimer")}
             </p>
           </footer>
@@ -493,11 +550,11 @@ export function AISidebar({
             size="icon"
             onClick={onToggle}
             aria-label={t("showPanel")}
-            className="h-11 w-11 rounded-lg"
+            className="h-11 w-11 rounded-xl"
           >
-            <PanelRightClose className="h-4 w-4 rotate-180 text-sidebar-foreground/70" />
+            <PanelRightClose className="h-4 w-4 rotate-180 text-muted-foreground" />
           </Button>
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-sidebar-primary/15 text-sidebar-primary">
+          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 text-primary">
             <Sparkles className="h-4 w-4" aria-hidden />
           </div>
         </div>
@@ -507,17 +564,38 @@ export function AISidebar({
   );
 }
 
-function GreetingBlock({ content }: { content: string }) {
-  const t = useTranslations("ai");
-
+function EmptyGreeting({
+  content,
+  suggestedPrompts,
+  onSuggestedPrompt,
+}: {
+  content: string;
+  suggestedPrompts?: { label: string; prompt: string }[];
+  onSuggestedPrompt: (prompt: string) => void;
+}) {
   return (
-    <div className="flex justify-start">
-      <article className="max-w-[92%]" aria-label={t("assistantLabel")}>
-        <MessageMeta isUser={false} />
-        <div className="rounded-2xl rounded-tl-md border border-sidebar-primary/20 bg-sidebar-primary/10 px-3.5 py-2.5 text-sm leading-snug whitespace-pre-wrap text-sidebar-accent-foreground shadow-sm">
-          {content}
+    <div className="flex w-full max-w-[280px] flex-col items-center gap-6">
+      <div className="flex flex-col items-center gap-4">
+        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary shadow-sm">
+          <Sparkles className="h-5 w-5" aria-hidden />
         </div>
-      </article>
+        <p className="text-sm leading-relaxed text-muted-foreground">{content}</p>
+      </div>
+
+      {suggestedPrompts?.length ? (
+        <div className="flex w-full flex-col gap-2">
+          {suggestedPrompts.map((item) => (
+            <button
+              key={item.label}
+              type="button"
+              onClick={() => onSuggestedPrompt(item.prompt)}
+              className="w-full rounded-xl border border-border/50 bg-secondary/60 px-3 py-2.5 text-sm font-medium text-foreground/85 transition-colors hover:border-primary/35 hover:bg-primary/10"
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -527,8 +605,8 @@ function ThinkingBubble({ label }: { label: string }) {
     <div className="flex justify-start">
       <div className="max-w-[92%]">
         <MessageMeta isUser={false} />
-        <div className="rounded-2xl rounded-tl-md border border-sidebar-border bg-sidebar-accent px-3.5 py-2.5 shadow-sm">
-          <p className="text-sm text-sidebar-foreground/70" role="status" aria-live="polite">
+        <div className="rounded-2xl rounded-tl-md border border-border/50 bg-secondary px-3.5 py-2.5 shadow-sm">
+          <p className="text-sm text-muted-foreground" role="status" aria-live="polite">
             {label}
             <span className="inline-flex w-4 animate-pulse">…</span>
           </p>
@@ -546,14 +624,14 @@ function MessageMeta({ isUser }: { isUser: boolean }) {
       className={cn("mb-1.5 flex items-center gap-1.5", isUser ? "justify-end" : "justify-start")}
     >
       {!isUser ? (
-        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-sidebar-primary/15 text-sidebar-primary">
+        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-primary">
           <Sparkles className="h-3 w-3" aria-hidden />
         </span>
       ) : null}
       <span
         className={cn(
           "text-[11px] font-semibold uppercase tracking-widest",
-          isUser ? "text-sidebar-primary" : "text-sidebar-foreground/65",
+          isUser ? "text-primary" : "text-muted-foreground",
         )}
       >
         {isUser ? t("userLabel") : t("assistantLabel")}
@@ -602,13 +680,13 @@ function MessageBlock({
           className={cn(
             "rounded-2xl px-3.5 py-2.5 text-sm leading-snug whitespace-pre-wrap shadow-sm",
             isUser
-              ? "rounded-tr-md border border-sidebar-primary/25 bg-sidebar-primary/12 text-sidebar-foreground"
-              : "rounded-tl-md border border-sidebar-border bg-sidebar-accent text-sidebar-accent-foreground",
+              ? "rounded-tr-md border border-primary/25 bg-primary/10"
+              : "rounded-tl-md border border-border/50 bg-secondary",
           )}
         >
           {content}
           {isStreaming ? (
-            <span className="ml-0.5 inline-block h-4 w-0.5 animate-pulse bg-sidebar-primary align-middle" />
+            <span className="ml-0.5 inline-block h-4 w-0.5 animate-pulse bg-primary align-middle" />
           ) : null}
         </div>
 

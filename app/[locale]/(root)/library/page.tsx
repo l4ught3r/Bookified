@@ -278,12 +278,12 @@ export default function LibraryPage() {
 
       <main
         id="main-content"
-        className="surface-library min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-3 py-5 pb-[calc(5rem+env(safe-area-inset-bottom))] [scrollbar-gutter:stable] sm:px-4 sm:py-6 md:px-8 md:pb-6 lg:px-12"
+        className="surface-library min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-3 py-5 pb-[calc(5rem+env(safe-area-inset-bottom))] [scrollbar-gutter:stable] sm:px-4 sm:py-6 md:px-8 lg:px-12 lg:pb-6"
       >
         <div className="mx-auto max-w-7xl">
-          <div className="mb-6 sm:mb-8">
+          <div className="mb-3 sm:mb-4">
             <h1 className="type-page-title">{t("title")}</h1>
-            <p className="mt-1.5 text-sm text-muted-foreground sm:mt-2 sm:text-base">
+            <p className="mt-1 text-sm text-muted-foreground sm:text-base">
               {loading ? t("loadingBooks") : t("booksCount", { count: books.length })}
             </p>
           </div>
@@ -300,62 +300,63 @@ export default function LibraryPage() {
                 placeholder={t("searchPlaceholder")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="h-11 rounded-xl border-border/50 bg-card pl-10"
+                className="h-11 rounded-xl border-border/50 bg-card pl-10 focus-visible:border-border/50 focus-visible:ring-0"
               />
             </div>
 
-            <div className="flex items-center justify-end gap-2">
-              <button
-                type="button"
-                onClick={() => void handleRefreshLibrary()}
-                disabled={isRefreshBusy || loading}
-                aria-label={t("refreshLibrary")}
-                className={cn(
-                  "flex h-11 w-11 items-center justify-center rounded-xl bg-secondary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
-                  "text-muted-foreground hover:bg-secondary/80 hover:text-foreground",
-                )}
-              >
-                <RefreshCw
-                  className={cn("h-4 w-4", isRefreshBusy && "animate-spin")}
-                  aria-hidden
-                />
-              </button>
+            <div className="flex w-full items-center justify-start gap-2 md:w-auto md:justify-end">
+              <div className="flex items-center gap-2">
+                <div
+                  className="flex items-center rounded-xl bg-secondary p-1"
+                  role="group"
+                  aria-label={t("viewMode")}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setViewMode("grid")}
+                    aria-label={t("gridView")}
+                    aria-pressed={viewMode === "grid"}
+                    className={cn(
+                      "flex h-11 w-11 items-center justify-center rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                      viewMode === "grid"
+                        ? "bg-card text-foreground shadow-sm"
+                        : "text-muted-foreground hover:text-foreground",
+                    )}
+                  >
+                    <Grid3X3 className="h-4 w-4" aria-hidden />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setViewMode("list")}
+                    aria-label={t("listView")}
+                    aria-pressed={viewMode === "list"}
+                    className={cn(
+                      "flex h-11 w-11 items-center justify-center rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                      viewMode === "list"
+                        ? "bg-card text-foreground shadow-sm"
+                        : "text-muted-foreground hover:text-foreground",
+                    )}
+                  >
+                    <List className="h-4 w-4" aria-hidden />
+                  </button>
+                </div>
 
-              <div
-                className="flex items-center rounded-xl bg-secondary p-1"
-                role="group"
-                aria-label={t("viewMode")}
-              >
                 <button
                   type="button"
-                  onClick={() => setViewMode("grid")}
-                  aria-label={t("gridView")}
-                  aria-pressed={viewMode === "grid"}
+                  onClick={() => void handleRefreshLibrary()}
+                  disabled={isRefreshBusy || loading}
+                  aria-label={t("refreshLibrary")}
                   className={cn(
-                    "flex h-11 w-11 items-center justify-center rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                    viewMode === "grid"
-                      ? "bg-card text-foreground shadow-sm"
-                      : "text-muted-foreground hover:text-foreground",
+                    "flex h-11 w-11 items-center justify-center rounded-xl bg-secondary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+                    "text-muted-foreground hover:bg-secondary/80 hover:text-foreground",
                   )}
                 >
-                  <Grid3X3 className="h-4 w-4" aria-hidden />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setViewMode("list")}
-                  aria-label={t("listView")}
-                  aria-pressed={viewMode === "list"}
-                  className={cn(
-                    "flex h-11 w-11 items-center justify-center rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                    viewMode === "list"
-                      ? "bg-card text-foreground shadow-sm"
-                      : "text-muted-foreground hover:text-foreground",
-                  )}
-                >
-                  <List className="h-4 w-4" aria-hidden />
+                  <RefreshCw
+                    className={cn("h-4 w-4", isRefreshBusy && "animate-spin")}
+                    aria-hidden
+                  />
                 </button>
               </div>
-
             </div>
           </div>
 

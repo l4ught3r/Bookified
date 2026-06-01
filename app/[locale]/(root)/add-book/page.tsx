@@ -320,7 +320,7 @@ export default function AddBookPage() {
         open={isUploading}
         labelledBy="upload-dialog-title"
         describedBy="upload-dialog-description"
-        panelClassName="rounded-2xl border border-border/50 bg-card p-8 shadow-xl"
+        panelClassName="rounded-2xl border border-border/50 bg-card p-6 shadow-xl sm:p-8"
       >
         <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10">
           {uploadStatus === "uploading" ? (
@@ -371,7 +371,7 @@ export default function AddBookPage() {
       <AnimatedOverlay
         open={uploadStatus === "duplicate"}
         labelledBy="duplicate-dialog-title"
-        panelClassName="rounded-2xl border border-border/50 bg-card p-8 shadow-xl"
+        panelClassName="rounded-2xl border border-border/50 bg-card p-6 shadow-xl sm:p-8"
       >
         <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-secondary">
           <BookOpen className="h-7 w-7 text-primary" />
@@ -428,23 +428,23 @@ export default function AddBookPage() {
       <main
         id="main-content"
         ref={mainScrollRef}
-        className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-4 py-6 pb-[calc(5rem+env(safe-area-inset-bottom))] [scrollbar-gutter:stable] md:px-8 md:pb-6 lg:px-12"
+        className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-y-contain px-3 py-5 pb-[calc(5rem+env(safe-area-inset-bottom))] sm:px-4 sm:py-6 md:px-8 lg:px-12 lg:pb-6 lg:[scrollbar-gutter:stable]"
       >
-        <div className="mx-auto max-w-3xl">
+        <div className="mx-auto w-full min-w-0 max-w-3xl">
           {/* Header */}
-          <div className="mb-8 text-center">
+          <div className="mb-6 text-center sm:mb-8">
             <h1 className="type-page-title">{t("title")}</h1>
-            <p className="mt-2 text-muted-foreground">{t("pageSubtitle")}</p>
+            <p className="mt-2 text-sm text-muted-foreground sm:text-base">{t("pageSubtitle")}</p>
           </div>
 
           {uploadStatus === "success" ? (
-            <div className="animate-in fade-in rounded-2xl bg-card p-8 text-center shadow-sm duration-300">
+            <div className="animate-in fade-in rounded-2xl bg-card p-6 text-center shadow-sm duration-300 sm:p-8">
               <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-success/15">
                 <CheckCircle2 className="h-8 w-8 text-success" />
               </div>
               <h2 className="text-xl font-semibold">{t("success")}</h2>
               <p className="mt-2 text-muted-foreground">{t("successReadyDescription")}</p>
-              <div className="mt-6 flex justify-center gap-3">
+              <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
                 <Button variant="outline" onClick={resetForm} className="rounded-xl">
                   {t("addAnother")}
                 </Button>
@@ -459,8 +459,8 @@ export default function AddBookPage() {
               </div>
             </div>
           ) : (
-            <div className="animate-in fade-in space-y-6 duration-300">
-              <div className="rounded-2xl bg-card p-6 shadow-sm">
+            <div className="animate-in fade-in space-y-4 duration-300 sm:space-y-6">
+              <div className="rounded-2xl bg-card p-4 shadow-sm sm:p-6">
                 <input
                   ref={bookFileInputRef}
                   id="book-file-upload"
@@ -479,18 +479,18 @@ export default function AddBookPage() {
                   onDragLeave={handleDrag}
                   onDragOver={handleDrag}
                   onDrop={handleDrop}
-                  className={`relative flex min-h-[200px] flex-col items-center justify-center rounded-xl border-2 border-dashed transition-colors ${
+                  className={`relative flex min-h-[180px] flex-col items-center justify-center rounded-xl border-2 border-dashed px-4 py-6 text-center transition-colors sm:min-h-[200px] ${
                     dragActive
                       ? "border-primary bg-primary/5"
                       : "border-border hover:border-primary/50"
                   }`}
                 >
                   {selectedFile ? (
-                    <div className="flex flex-col items-center">
+                    <div className="flex w-full max-w-full flex-col items-center">
                       <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
                         <FileText className="h-6 w-6 text-primary" aria-hidden />
                       </div>
-                      <p className="font-medium">{selectedFile.name}</p>
+                      <p className="max-w-full truncate px-2 font-medium">{selectedFile.name}</p>
                       <div className="mt-2 flex items-center gap-2">
                         <p className="text-sm text-muted-foreground">
                           {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB
@@ -543,19 +543,21 @@ export default function AddBookPage() {
               </div>
 
               {/* Metadata form */}
-              <div className="rounded-2xl bg-card p-6 shadow-sm">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <BookOpen className="h-5 w-5 text-primary" aria-hidden />
-                    <h2 className="text-base font-semibold">{t("metadataTitle")}</h2>
-                    <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+              <div className="rounded-2xl bg-card p-4 shadow-sm sm:p-6">
+                <div className="flex flex-col items-center gap-2 text-center sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:text-left">
+                  <div className="flex flex-col items-center gap-1 sm:flex-row sm:flex-wrap sm:items-center sm:gap-2">
+                    <div className="flex items-center gap-2">
+                      <BookOpen className="h-5 w-5 shrink-0 text-primary" aria-hidden />
+                      <h2 className="text-base font-semibold">{t("metadataTitle")}</h2>
+                    </div>
+                    <span className="inline-flex rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
                       {t("metadataAiHint")}
                     </span>
                   </div>
                   <button
                     type="button"
                     onClick={toggleManualMetadata}
-                    className="inline-flex min-h-11 items-center gap-1 rounded-lg px-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className="inline-flex min-h-10 w-full items-center justify-center gap-1 rounded-lg px-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:w-auto sm:justify-start"
                     aria-expanded={showManualMetadata}
                   >
                     {t("manualMetadata")}
@@ -581,7 +583,7 @@ export default function AddBookPage() {
                       !showManualMetadata && "pointer-events-none",
                     )}
                   >
-                    <div className="grid gap-4 pt-4 md:grid-cols-2">
+                    <div className="grid gap-3 pt-3 md:grid-cols-2 sm:pt-4 sm:gap-4">
                       <div className="md:col-span-2">
                         <label htmlFor="book-title" className="mb-2 block text-sm font-medium">
                           {t("fieldTitle")}
@@ -616,7 +618,7 @@ export default function AddBookPage() {
                         <label htmlFor="book-cover-url" className="mb-2 block text-sm font-medium">
                           {t("fieldCover")}
                         </label>
-                        <div className="flex gap-2">
+                        <div className="flex min-w-0 gap-2">
                           <Input
                             id="book-cover-url"
                             placeholder={t("fieldCoverUrlPlaceholder")}
@@ -630,7 +632,7 @@ export default function AddBookPage() {
                               setBookMetadata({ ...bookMetadata, cover: value });
                               updateCoverPreview(value.trim() || null, false);
                             }}
-                            className="h-11 rounded-xl"
+                            className="h-11 min-w-0 flex-1 rounded-xl"
                           />
                           <input
                             ref={coverInputRef}

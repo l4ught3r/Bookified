@@ -241,7 +241,7 @@ export function LeftSidebar({ isOpen, onToggle, bookId, chapters = [] }: LeftSid
                     aria-label={t("searchBooks")}
                     aria-expanded={showSearchResults}
                     aria-controls="sidebar-book-search-results"
-                    className="h-11 rounded-xl border-border/50 bg-secondary/50 pl-9 text-sm placeholder:text-muted-foreground focus-visible:ring-primary"
+                    className="h-11 rounded-xl border-border/50 bg-secondary/50 pl-9 text-sm placeholder:text-muted-foreground focus-visible:border-border/50 focus-visible:ring-0"
                   />
                 </div>
 

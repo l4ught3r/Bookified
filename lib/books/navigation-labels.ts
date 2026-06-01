@@ -1,4 +1,5 @@
 import { normalizeChapterHref } from "@/lib/books/chapter-href";
+import { lookupTocTitle } from "@/lib/books/toc-titles";
 
 export type NavigationItemKind =
   | "cover"
@@ -63,6 +64,8 @@ const ROMAN_NUMERAL_PATTERN = /^[IVXLCDM]+$/i;
 
 const NUMBERED_CHAPTER_HEADING_PATTERN =
   /^(?:chapter|part|section|book|глава|часть|раздел|том)\s+\d+$/i;
+
+const PART_TITLE_PATTERN = /^(?:часть|part|book|том)(?:\s|$)/i;
 
 /** Only parse the start of chapter HTML — headings live at the top. */
 const HTML_NAV_SAMPLE_SIZE = 4096;
@@ -244,13 +247,13 @@ export function classifyNavigationItem(input: NavigationItemInput): NavigationIt
 }
 
 function pickChapterNameTitle(input: NavigationItemInput, tocByHref?: Map<string, string>): string {
-  if (isMeaningfulChapterTitle(input.title)) {
-    return input.title.trim();
-  }
-
-  const tocTitle = tocByHref?.get(normalizeChapterHref(input.href));
+  const tocTitle = tocByHref ? lookupTocTitle(input.href, tocByHref) : undefined;
   if (tocTitle && isMeaningfulChapterTitle(tocTitle)) {
     return tocTitle.trim();
+  }
+
+  if (isMeaningfulChapterTitle(input.title)) {
+    return input.title.trim();
   }
 
   if (input.contentHtml) {
@@ -324,6 +327,27 @@ export function getNavigationDisplayTitle(
   return resolveNonChapterTitle(kind, input, labels);
 }
 
+function applyPartContextToNavigationTitles(
+  items: Array<{ order: number; title: string; kind: NavigationItemKind }>,
+): Array<{ order: number; title: string; kind: NavigationItemKind }> {
+  let currentPart: string | null = null;
+
+  return items.map((item) => {
+    const title = item.title.trim();
+
+    if (PART_TITLE_PATTERN.test(title)) {
+      currentPart = title;
+      return item;
+    }
+
+    if (item.kind !== "chapter" || !currentPart || !ROMAN_NUMERAL_PATTERN.test(title)) {
+      return item;
+    }
+
+    return { ...item, title: `${currentPart} · ${title}` };
+  });
+}
+
 export function buildNavigationDisplayItems(
   items: NavigationItemInput[],
   labels: NavigationKindLabels,
@@ -331,7 +355,7 @@ export function buildNavigationDisplayItems(
 ): Array<{ order: number; title: string; kind: NavigationItemKind }> {
   let chapterIndex = 0;
 
-  return items.map((item) => {
+  const displayItems = items.map((item) => {
     const kind = classifyNavigationItem(item);
     if (kind === "chapter") {
       chapterIndex += 1;
@@ -344,4 +368,6 @@ export function buildNavigationDisplayItems(
 
     return { order: item.order, title, kind };
   });
+
+  return applyPartContextToNavigationTitles(displayItems);
 }

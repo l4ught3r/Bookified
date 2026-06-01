@@ -402,16 +402,10 @@ export function ReaderView({ bookId }: ReaderViewProps) {
   }
 
   return (
-    <ReadingFontsProvider
-      className={cn(
-        "flex h-dvh flex-col bg-background",
-        isMobileLayout &&
-          "[--reader-floating-chrome-top:calc(env(safe-area-inset-top)+7.75rem)]",
-      )}
-    >
+    <ReadingFontsProvider className="flex h-dvh flex-col bg-background">
       <TopNavbar />
 
-      {isMobileLayout ? (
+      {isMobileLayout && (isPdf || isCoverPage) ? (
         <div className="flex shrink-0 items-center justify-between gap-2 border-b border-border/40 bg-card px-3 py-2 lg:hidden">
           <Button
             type="button"
@@ -492,6 +486,12 @@ export function ReaderView({ bookId }: ReaderViewProps) {
               onNextChapter={nextChapter}
               canGoPrev={canGoPrev}
               canGoNext={canGoNext}
+              mobileSidebarChrome={{
+                leftSidebarOpen,
+                rightSidebarOpen,
+                onOpenLeftSidebar: () => setLeftSidebarOpen(true),
+                onOpenRightSidebar: () => setRightSidebarOpen(true),
+              }}
             />
           )}
         </main>

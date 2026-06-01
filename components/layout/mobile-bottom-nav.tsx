@@ -34,7 +34,7 @@ export function MobileBottomNav() {
   return (
     <nav
       aria-label={t("mobileNavigation")}
-      className="fixed inset-x-0 bottom-0 z-50 border-t border-border/50 bg-card px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 md:hidden"
+      className="fixed inset-x-0 bottom-0 z-50 border-t border-border/50 bg-card px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 lg:hidden"
     >
       <ul className="mx-auto flex max-w-lg items-stretch justify-around gap-1">
         {navItems.map((item) => {

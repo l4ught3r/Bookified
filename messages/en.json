@@ -169,6 +169,8 @@
     "clearChat": "Clear chat",
     "moreActions": "More actions",
     "send": "Send message",
+    "voiceInput": "Voice input",
+    "stopRecording": "Stop recording",
     "placeholder": "Ask a question about the book...",
     "disclaimer": "AI may make mistakes. Verify important information.",
     "tryAsking": "Try asking:",

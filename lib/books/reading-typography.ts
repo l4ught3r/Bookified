@@ -30,6 +30,21 @@ export const DEFAULT_READING_TYPOGRAPHY: ReadingTypographySettings = {
   fontWeightBold: false,
 };
 
+export const MOBILE_DEFAULT_READING_FONT_SIZE = 14;
+
+export function getPlatformDefaultReadingTypography(
+  isMobileLayout: boolean,
+): ReadingTypographySettings {
+  if (!isMobileLayout) {
+    return { ...DEFAULT_READING_TYPOGRAPHY };
+  }
+
+  return {
+    ...DEFAULT_READING_TYPOGRAPHY,
+    fontSize: MOBILE_DEFAULT_READING_FONT_SIZE,
+  };
+}
+
 const FONT_ALIASES: Record<string, string> = {
   geist: "geist",
   inter: "inter",

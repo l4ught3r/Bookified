@@ -98,7 +98,7 @@ export function ReaderContentsDialog({
         aria-labelledby={titleId}
         className={cn(
           "fixed z-101 flex flex-col overflow-hidden border border-border/50 bg-card shadow-2xl",
-          "max-lg:inset-x-0 max-lg:bottom-0 max-lg:top-auto max-lg:max-h-[min(82dvh,640px)] max-lg:w-full max-lg:rounded-t-2xl max-lg:rounded-b-none",
+          "max-lg:inset-x-0 max-lg:bottom-0 max-lg:top-auto max-lg:h-[min(82dvh,640px)] max-lg:w-full max-lg:rounded-t-2xl max-lg:rounded-b-none",
           "max-lg:animate-in max-lg:fade-in-0 max-lg:slide-in-from-bottom-4 max-lg:duration-200",
           "lg:top-14 lg:bottom-14 lg:right-10 lg:left-auto lg:w-[min(88%,28rem)] lg:rounded-2xl",
           "lg:animate-in lg:fade-in-0 lg:slide-in-from-right-4 lg:duration-200 motion-reduce:animate-none",
@@ -179,7 +179,7 @@ export function ReaderContentsDialog({
           ))}
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain">
           {activeTab === "toc" ? (
             <ul className="divide-y divide-border/40">
               {chapters.map((chapter) => {
@@ -244,9 +244,9 @@ export function ReaderContentsDialog({
               ))}
             </ul>
           ) : (
-            <p className="px-4 py-8 text-center text-sm text-muted-foreground sm:px-5 sm:py-10">
-              {t("bookmarksEmpty")}
-            </p>
+            <div className="flex flex-1 items-center justify-center px-4 py-8 sm:px-5">
+              <p className="text-center text-sm text-muted-foreground">{t("bookmarksEmpty")}</p>
+            </div>
           )}
         </div>
       </aside>

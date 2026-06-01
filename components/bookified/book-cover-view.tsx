@@ -32,38 +32,42 @@ export function BookCoverView({
   return (
     <div
       className={cn(
-        "flex h-full min-h-0 flex-1 flex-col items-center justify-center bg-reading-bg px-4 py-8 sm:px-6 sm:py-10",
+        "flex h-full min-h-0 flex-1 flex-col items-center overflow-y-auto bg-reading-bg px-4 py-6 sm:justify-center sm:px-6 sm:py-10",
         className,
       )}
     >
       <div className="flex w-full max-w-md flex-col items-center text-center">
-        <div className="relative mb-8 aspect-2/3 w-full max-w-[280px] overflow-hidden rounded-2xl border border-border/40 bg-card shadow-lg">
+        <div className="relative mb-5 aspect-2/3 w-28 shrink-0 overflow-hidden rounded-2xl border border-border/40 bg-card shadow-lg sm:mb-8 sm:w-full sm:max-w-[280px]">
           {showCover && coverUrl ? (
             <Image
               src={coverUrl}
               alt={title}
               fill
               className="object-cover"
-              sizes="280px"
+              sizes="(max-width: 640px) 112px, 280px"
               priority
               unoptimized={isAuthenticatedBookAssetUrl(coverUrl)}
               onError={() => setCoverFailed(true)}
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center bg-secondary p-8">
-              <span className="text-balance text-2xl font-semibold leading-tight text-foreground/80">
+            <div className="flex h-full w-full items-center justify-center bg-secondary p-3 sm:p-8">
+              <span className="text-balance text-sm font-semibold leading-tight text-foreground/80 sm:text-2xl">
                 {title}
               </span>
             </div>
           )}
         </div>
 
-        <h1 className="text-balance text-[clamp(1.5rem,2vw+1rem,1.875rem)] font-semibold tracking-tight">
+        <h1 className="text-balance text-xl font-semibold tracking-tight sm:text-[clamp(1.5rem,2vw+1rem,1.875rem)]">
           {title}
         </h1>
-        <p className="mt-2 text-muted-foreground">{authorLine}</p>
+        <p className="mt-1.5 text-sm text-muted-foreground sm:mt-2 sm:text-base">{authorLine}</p>
 
-        <Button className="mt-8 gap-2 rounded-xl px-8" size="lg" onClick={onStartReading}>
+        <Button
+          className="mt-6 gap-2 rounded-xl px-8 sm:mt-8"
+          size="lg"
+          onClick={onStartReading}
+        >
           {t("startReading")}
           <ChevronRight className="h-4 w-4" />
         </Button>
