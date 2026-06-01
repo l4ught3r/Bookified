@@ -127,6 +127,9 @@ NEXT_PUBLIC_SUPABASE_BUCKET_NAME=bookified
 GEMINI_API_KEY=...
 GEMINI_MODEL=gemini-3.5-flash
 GEMINI_MODEL_FAST=gemini-3.1-flash-lite
+# Опционально: Gemini Live (голосовой диалог)
+# GEMINI_LIVE_MODEL=gemini-3.1-flash-live-preview
+# Текст речи в чате — batch-транскрипция через GEMINI_MODEL_FAST после каждой реплики
 
 ### 3. База данных
 
