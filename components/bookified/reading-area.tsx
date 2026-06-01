@@ -633,17 +633,17 @@ export function ReadingArea({
         </Tooltip>
         <PopoverContent
           className={cn(
-            "rounded-xl border-border/50",
+            "overflow-visible rounded-xl border-border/50 p-4",
             isMobileLayout
-              ? "w-[calc(100vw-1rem)] max-w-md overflow-hidden p-2.5"
-              : "max-h-[min(72dvh,32rem)] w-[min(calc(100vw-2rem),20rem)] overflow-y-auto rounded-sm p-4",
+              ? "w-[calc(100vw-1rem)] max-w-md"
+              : "w-[min(calc(100vw-2rem),20rem)]",
           )}
           align={isMobileLayout ? "center" : "end"}
           side={isMobileLayout ? "bottom" : "bottom"}
           sideOffset={isMobileLayout ? 10 : 8}
           collisionPadding={12}
         >
-          <div className={cn(isMobileLayout ? "space-y-2" : "space-y-5")}>
+          <div className="space-y-5">
             <div className={cn(isMobileLayout ? "space-y-0" : "space-y-2")}>
               <div className="flex items-center gap-2">
                 <Select

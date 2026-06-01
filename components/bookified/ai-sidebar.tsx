@@ -21,6 +21,7 @@ import { AuthSignInButton } from "@/components/auth/clerk-auth";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { useAutoResizeTextarea } from "@/hooks/use-auto-resize-textarea";
 import { useGeminiLiveVoice } from "@/hooks/use-gemini-live-voice";
 import { useLockBodyScroll } from "@/hooks/use-lock-body-scroll";
 import { useIsMobileLayout } from "@/hooks/use-media-query";
@@ -174,6 +175,8 @@ export function AISidebar({
       : initialPrompt
         ? t("fragmentPrefix", { text: initialPrompt })
         : "";
+
+  const resizeTextarea = useAutoResizeTextarea(textareaRef, inputValue);
 
   const selectedTextForSession = initialPrompt?.trim() || undefined;
 
@@ -641,13 +644,17 @@ export function AISidebar({
                   <Textarea
                     ref={textareaRef}
                     value={inputValue}
-                    onChange={(e) => setTypedInput(e.target.value)}
+                    onChange={(e) => {
+                      setTypedInput(e.target.value);
+                      requestAnimationFrame(resizeTextarea);
+                    }}
+                    onInput={resizeTextarea}
                     onKeyDown={handleKeyDown}
                     placeholder={t("placeholder")}
                     aria-label={t("placeholder")}
                     disabled={isLoading || isLiveVoiceActive}
                     rows={1}
-                    className="max-h-40 min-h-9 flex-1 resize-none border-0 bg-transparent px-1 py-2 text-base shadow-none outline-none ring-0 placeholder:text-muted-foreground focus-visible:border-transparent focus-visible:ring-0 focus-visible:ring-offset-0 disabled:opacity-50"
+                    className="block max-h-40 min-h-9 w-full min-w-0 flex-1 resize-none overflow-hidden border-0 bg-transparent px-1 py-2 text-base leading-snug shadow-none outline-none ring-0 placeholder:text-muted-foreground focus-visible:border-transparent focus-visible:ring-0 focus-visible:ring-offset-0 disabled:opacity-50"
                   />
                   {hasInput ? (
                     <Button
