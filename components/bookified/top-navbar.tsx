@@ -45,9 +45,10 @@ export function TopNavbar() {
     <header className="sticky top-0 z-50 flex h-14 shrink-0 items-center border-b border-border/50 bg-card px-2 pt-[env(safe-area-inset-top)] sm:h-16 sm:px-4">
       <div className="flex min-w-0 flex-1 items-center justify-start">
         {showMobileReaderBackButton ? (
-          <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl" asChild>
+          <Button variant="ghost" className="h-10 gap-0.5 rounded-xl px-2 sm:px-3" asChild>
             <Link href="/library" aria-label={tReader("backToLibrary")}>
-              <ChevronLeft className="h-5 w-5" aria-hidden />
+              <ChevronLeft className="h-5 w-5 shrink-0" aria-hidden />
+              <span className="text-sm font-medium">{t("library")}</span>
             </Link>
           </Button>
         ) : (

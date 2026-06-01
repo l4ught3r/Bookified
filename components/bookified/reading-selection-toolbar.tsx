@@ -6,10 +6,12 @@ import { Check, Copy, Sparkles } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import type { SelectionToolbarPlacement } from "@/hooks/use-reading-text-selection";
+import { cn } from "@/lib/utils";
 
 type ReadingSelectionToolbarProps = {
   selectedText: string;
-  selectionPosition: { x: number; y: number } | null;
+  selectionPosition: { x: number; y: number; placement: SelectionToolbarPlacement } | null;
   selectionToolbarRef: React.RefObject<HTMLDivElement | null>;
   onToolbarPointerDown: (event: React.MouseEvent | React.PointerEvent) => void;
   onAskAboutSelection: () => void;
@@ -40,15 +42,22 @@ export function ReadingSelectionToolbar({
     return null;
   }
 
+  const toolbarTransform =
+    selectionPosition.placement === "below-bounds-end"
+      ? "translate(-100%, 0)"
+      : "translate(0, -100%)";
+
   return createPortal(
     <TooltipProvider>
       <div
         ref={selectionToolbarRef}
-        className="fixed z-50 flex items-center gap-1 rounded-2xl border border-border/50 bg-card p-1.5 shadow-xl select-none animate-in fade-in-0 zoom-in-95 duration-150 motion-reduce:animate-none"
+        className={cn(
+          "fixed z-60 flex items-center gap-1 rounded-2xl border border-border/50 bg-card p-1.5 shadow-xl select-none animate-in fade-in-0 zoom-in-95 duration-150 motion-reduce:animate-none",
+        )}
         style={{
           left: selectionPosition.x,
           top: selectionPosition.y,
-          transform: "translate(0%, -100%)",
+          transform: toolbarTransform,
         }}
         role="toolbar"
         aria-label={t("selectionActions")}
