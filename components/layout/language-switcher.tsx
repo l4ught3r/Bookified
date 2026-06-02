@@ -7,8 +7,8 @@ import { Link, usePathname } from "@/lib/i18n/navigation";
 import { cn } from "@/lib/utils";
 
 const locales = [
-  { code: "ru", label: "RU" },
-  { code: "en", label: "EN" },
+  { code: "ru", label: "RU", nameKey: "languageRu" as const },
+  { code: "en", label: "EN", nameKey: "languageEn" as const },
 ] as const;
 
 const LanguageSwitcher = () => {
@@ -26,15 +26,16 @@ const LanguageSwitcher = () => {
       role="group"
       aria-label={t("language")}
     >
-      {locales.map(({ code, label }) => {
-        const isActive = locale === code;
+      {locales.map(({ code, label, nameKey }) => {
+          const isActive = locale === code;
 
-        return (
-          <Link
-            key={code}
-            href={href}
-            locale={code}
-            aria-current={isActive ? "true" : undefined}
+          return (
+            <Link
+              key={code}
+              href={href}
+              locale={code}
+              aria-label={t(nameKey)}
+              aria-current={isActive ? "true" : undefined}
             className={cn(
               "flex h-8 min-w-8 items-center justify-center rounded-md px-1.5 text-xs font-medium transition-colors sm:h-11 sm:min-w-11 sm:rounded-lg sm:px-2.5 sm:text-sm",
               isActive

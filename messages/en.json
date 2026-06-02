@@ -10,7 +10,8 @@
     "brand": "Bookified",
     "tryLater": "Try again later",
     "noConnection": "No connection",
-    "signInRequired": "Sign in required"
+    "signInRequired": "Sign in required",
+    "close": "Close"
   },
   "nav": {
     "library": "Library",
@@ -20,7 +21,9 @@
     "syncing": "Syncing with cloud...",
     "syncLibrary": "Sync with cloud",
     "mobileNavigation": "Main navigation",
-    "language": "Language"
+    "language": "Language",
+    "languageRu": "Russian",
+    "languageEn": "English"
   },
   "library": {
     "title": "My library",
@@ -159,7 +162,21 @@
     "offlineUnavailable": "Book unavailable offline. Open it once while online.",
     "signInToLoad": "Sign in to load the book.",
     "bookNotFound": "Book not found",
-    "loadError": "Failed to load book"
+    "loadError": "Failed to load book",
+    "readingProgress": "Reading progress: {percent}%",
+    "currentChapter": "Current chapter",
+    "pdfFitWidth": "Fit to screen width",
+    "pdfZoomOut": "Zoom out",
+    "pdfZoomIn": "Zoom in",
+    "pdfLoading": "Loading PDF…",
+    "pdfOpening": "Opening document…",
+    "pdfLoadError": "Could not open PDF",
+    "pdfRenderError": "Could not render page",
+    "pdfPrevPage": "Previous page",
+    "pdfNextPage": "Next page",
+    "pdfPrevPageShort": "Previous",
+    "pdfNextPageShort": "Next",
+    "bookIllustration": "Illustration in book"
   },
   "ai": {
     "title": "AI Assistant",
@@ -185,6 +202,7 @@
     "stopRecording": "Stop recording",
     "placeholder": "Ask a question about the book...",
     "disclaimer": "AI may make mistakes. Verify important information.",
+    "chapterContextHint": "The assistant sees a portion of the current chapter, not necessarily the full text.",
     "tryAsking": "Try asking:",
     "copy": "Copy",
     "copied": "Copied",

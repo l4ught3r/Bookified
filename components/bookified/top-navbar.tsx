@@ -58,7 +58,7 @@ export function TopNavbar() {
             className="flex min-w-0 max-w-full items-center gap-1.5 rounded-xl px-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:gap-2 sm:px-2"
           >
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary sm:h-9 sm:w-9 sm:rounded-xl">
-              <BookOpen className="h-4 w-4 text-primary-foreground sm:h-5 sm:w-5" />
+              <BookOpen className="h-4 w-4 text-primary-foreground sm:h-5 sm:w-5" aria-hidden />
             </div>
             <span className="truncate font-display text-sm font-semibold tracking-tight min-[480px]:text-base sm:text-lg lg:hidden xl:inline xl:text-xl">
               {tCommon("brand")}
@@ -69,7 +69,7 @@ export function TopNavbar() {
 
       <nav
         className="absolute left-1/2 hidden max-w-[min(100%,28rem)] -translate-x-1/2 items-center gap-0.5 lg:flex xl:max-w-none xl:gap-1"
-        aria-label={t("library")}
+        aria-label={t("mobileNavigation")}
       >
         {navItems.map((item) => {
           const isActive =

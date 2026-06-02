@@ -8,6 +8,7 @@ interface CircularProgressProps {
   strokeWidth?: number;
   className?: string;
   showLabel?: boolean;
+  ariaLabel?: string;
 }
 
 function CircularProgress({
@@ -16,6 +17,7 @@ function CircularProgress({
   strokeWidth = 3,
   className,
   showLabel = false,
+  ariaLabel,
 }: CircularProgressProps) {
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
@@ -30,7 +32,7 @@ function CircularProgress({
       aria-valuenow={clamped}
       aria-valuemin={0}
       aria-valuemax={100}
-      aria-label={`Прогресс ${Math.round(clamped)}%`}
+      aria-label={ariaLabel ?? `Progress ${Math.round(clamped)}%`}
     >
       <svg width={size} height={size} className="-rotate-90" aria-hidden="true">
         <circle

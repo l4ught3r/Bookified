@@ -92,7 +92,7 @@ export function ReadingSelectionToolbar({
               onClick={onAskAboutSelection}
               aria-label={t("askAi")}
             >
-              <Sparkles className="h-3.5 w-3.5" />
+              <Sparkles className="h-3.5 w-3.5" aria-hidden />
             </Button>
           </TooltipTrigger>
           <TooltipContent>{t("askAi")}</TooltipContent>

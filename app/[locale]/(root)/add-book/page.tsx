@@ -342,7 +342,11 @@ export default function AddBookPage() {
             : t("uploadPreparingDescription")}
         </p>
 
-        <Progress value={uploadProgress} className="mt-6 h-2" />
+        <Progress
+          value={uploadProgress}
+          className="mt-6 h-2"
+          aria-labelledby="upload-dialog-description"
+        />
 
         <p className="mt-3 text-center text-xs tabular-nums text-muted-foreground">
           {uploadStatus === "processing"
@@ -372,6 +376,7 @@ export default function AddBookPage() {
         open={uploadStatus === "duplicate"}
         labelledBy="duplicate-dialog-title"
         panelClassName="rounded-2xl border border-border/50 bg-card p-6 shadow-xl sm:p-8"
+        onEscape={dismissDuplicate}
       >
         <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-secondary">
           <BookOpen className="h-7 w-7 text-primary" />

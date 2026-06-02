@@ -31,7 +31,7 @@ function renderInlineHtml(nodes: Fb2InlineNode[], bookId: string): string {
 
 function renderFigureHtml(binaryId: string, bookId: string): string {
   const src = bookAssetUrl(bookId, binaryId);
-  return `<figure class="book-inline-image"><img src="${src}" alt="" loading="lazy" /></figure>`;
+  return `<figure class="book-inline-image"><img src="${src}" alt="Illustration" loading="lazy" /></figure>`;
 }
 
 function renderPoemHtml(poem: Fb2Poem, bookId: string): string {

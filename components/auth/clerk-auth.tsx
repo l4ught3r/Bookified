@@ -8,7 +8,7 @@ import { ui } from "@clerk/ui";
 import { CircleUserIcon, Loader2 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
-import { useIsMobileLayout } from "@/hooks/use-media-query";
+import { useIsMobileLayout, useMediaQuery } from "@/hooks/use-media-query";
 import { useClerkRedirectUrl } from "@/lib/auth/use-clerk-redirect-url";
 import { clearReaderSession } from "@/lib/books/reader-storage";
 import { cn } from "@/lib/utils";
@@ -104,12 +104,13 @@ export function ClerkAuthControls() {
   const t = useTranslations("common");
   const { isLoaded, isSignedIn } = useAuth();
   const isMobileLayout = useIsMobileLayout();
+  const showSignInLabel = useMediaQuery("(min-width: 1280px)");
 
   return (
     <div
       className={cn(
         "flex h-8 shrink-0 items-center overflow-hidden",
-        isMobileLayout ? "w-8 justify-center" : "w-30 justify-end",
+        showSignInLabel ? "w-30 justify-end" : "w-8 justify-center",
         !isLoaded && "justify-center",
       )}
     >
@@ -127,7 +128,9 @@ export function ClerkAuthControls() {
             aria-label={t("signIn")}
           >
             <CircleUserIcon className="h-5 w-5 shrink-0 text-muted-foreground" aria-hidden />
-            <span className="hidden text-sm font-medium sm:inline">{t("signIn")}</span>
+            {showSignInLabel ? (
+              <span className="text-sm font-medium">{t("signIn")}</span>
+            ) : null}
           </button>
         </AuthSignInButton>
       )}

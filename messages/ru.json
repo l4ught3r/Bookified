@@ -10,7 +10,8 @@
     "brand": "Букифай",
     "tryLater": "Попробуйте позже",
     "noConnection": "Нет подключения",
-    "signInRequired": "Требуется вход"
+    "signInRequired": "Требуется вход",
+    "close": "Закрыть"
   },
   "nav": {
     "library": "Библиотека",
@@ -20,7 +21,9 @@
     "syncing": "Синхронизация с облаком...",
     "syncLibrary": "Синхронизировать с облаком",
     "mobileNavigation": "Основная навигация",
-    "language": "Язык интерфейса"
+    "language": "Язык интерфейса",
+    "languageRu": "Русский",
+    "languageEn": "Английский"
   },
   "library": {
     "title": "Моя библиотека",
@@ -159,7 +162,21 @@
     "offlineUnavailable": "Книга недоступна офлайн. Откройте её один раз при подключении к интернету.",
     "signInToLoad": "Войдите в аккаунт, чтобы загрузить книгу.",
     "bookNotFound": "Книга не найдена",
-    "loadError": "Ошибка загрузки книги"
+    "loadError": "Ошибка загрузки книги",
+    "readingProgress": "Прогресс чтения: {percent}%",
+    "currentChapter": "Текущая глава",
+    "pdfFitWidth": "По ширине экрана",
+    "pdfZoomOut": "Уменьшить",
+    "pdfZoomIn": "Увеличить",
+    "pdfLoading": "Загрузка PDF…",
+    "pdfOpening": "Открытие документа…",
+    "pdfLoadError": "Не удалось открыть PDF",
+    "pdfRenderError": "Не удалось отрисовать страницу",
+    "pdfPrevPage": "Предыдущая страница",
+    "pdfNextPage": "Следующая страница",
+    "pdfPrevPageShort": "Предыдущая",
+    "pdfNextPageShort": "Следующая",
+    "bookIllustration": "Иллюстрация в книге"
   },
   "ai": {
     "title": "AI Ассистент",
@@ -185,6 +202,7 @@
     "stopRecording": "Остановить запись",
     "placeholder": "Задайте вопрос о книге...",
     "disclaimer": "AI может ошибаться. Проверяйте важную информацию.",
+    "chapterContextHint": "Ассистент видит часть текущей главы, а не обязательно весь текст.",
     "tryAsking": "Попробуйте спросить:",
     "copy": "Копировать",
     "copied": "Скопировано",

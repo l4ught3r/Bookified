@@ -1,9 +1,19 @@
 export const CHUNK_TARGET_WORDS = 2500;
-export const SMALL_CHAPTER_WORDS = 3000;
+/** Chapters at or below this word count are sent in full (no excerpt trimming). */
+export const SMALL_CHAPTER_FULL_WORDS = 2500;
 export const OVERLAP_WORDS = 200;
-export const MAX_EXCERPT_WORDS = 600;
-export const GENERAL_INTENT_HEAD_WORDS = 300;
-export const GENERAL_INTENT_TAIL_WORDS = 300;
+
+export const DEFAULT_EXCERPT_WORDS = 1200;
+export const SUMMARY_EXCERPT_BUDGET = 2000;
+export const SUMMARY_PART_WORDS = 500;
+export const ENDING_EXCERPT_WORDS = 800;
+export const LOCAL_EXCERPT_WORDS = 1200;
+
+/** @deprecated Use intent-specific limits; kept for any external imports */
+export const MAX_EXCERPT_WORDS = DEFAULT_EXCERPT_WORDS;
+export const SMALL_CHAPTER_WORDS = SMALL_CHAPTER_FULL_WORDS;
+export const GENERAL_INTENT_HEAD_WORDS = SUMMARY_PART_WORDS;
+export const GENERAL_INTENT_TAIL_WORDS = SUMMARY_PART_WORDS;
 
 const STOP_WORDS = new Set([
   "a",
@@ -121,17 +131,14 @@ const STOP_WORDS = new Set([
   "всё",
   "вся",
   "весь",
-  "она",
   "оно",
   "так",
   "его",
   "но",
   "да",
-  "ты",
   "к",
   "у",
   "же",
-  "вы",
   "за",
   "бы",
   "по",
@@ -186,14 +193,37 @@ const STOP_WORDS = new Set([
   "которые",
 ]);
 
-const COMPLEX_INTENT_PATTERN =
-  /(?:summary|summarize|character|context|analysis|analyze|explain the context|historical|cultural|кратк|содержан|анализ|персонаж|контекст|историческ|культурн)/i;
+const SUMMARY_INTENT_PATTERN =
+  /(?:summary|summarize|recap|retell|outline|character|context|analysis|analyze|explain the context|historical|cultural|кратк|содержан|пересказ|перескаж|изложи|изложение|анализ|персонаж|контекст|историческ|культурн|о\s+ч[её]м\s+глава)/i;
+
+const ENDING_INTENT_PATTERN =
+  /(?:last\s+line|final\s+line|end\s+of\s+(?:the\s+)?chapter|how\s+does\s+(?:the\s+)?chapter\s+end|последн\w*\s+(?:строчк|строк|абзац|предложени)|конец\s+главы|чем\s+заканчивается|как\s+заканчивается|финал\s+главы)/i;
+
+export type ChapterQueryIntent = "summary" | "ending" | "default";
 
 export type ChapterExcerpt = {
   excerpt: string;
   chunkIndex: number;
   totalChunks: number;
+  coverage: "full" | "spread" | "partial";
 };
+
+export function detectChapterQueryIntent(query: string): ChapterQueryIntent {
+  const trimmed = query.trim();
+  if (!trimmed) {
+    return "default";
+  }
+
+  if (ENDING_INTENT_PATTERN.test(trimmed)) {
+    return "ending";
+  }
+
+  if (SUMMARY_INTENT_PATTERN.test(trimmed)) {
+    return "summary";
+  }
+
+  return "default";
+}
 
 function countWords(text: string): number {
   const trimmed = text.trim();
@@ -202,6 +232,19 @@ function countWords(text: string): number {
   }
 
   return trimmed.split(/\s+/).length;
+}
+
+function takeFirstWords(text: string, wordCount: number): string {
+  if (wordCount <= 0 || !text.trim()) {
+    return "";
+  }
+
+  const words = text.trim().split(/\s+/);
+  if (words.length <= wordCount) {
+    return text.trim();
+  }
+
+  return words.slice(0, wordCount).join(" ");
 }
 
 function takeLastWords(text: string, wordCount: number): string {
@@ -215,6 +258,20 @@ function takeLastWords(text: string, wordCount: number): string {
   }
 
   return words.slice(words.length - wordCount).join(" ");
+}
+
+function takeMiddleWords(text: string, wordCount: number): string {
+  if (wordCount <= 0 || !text.trim()) {
+    return "";
+  }
+
+  const words = text.trim().split(/\s+/);
+  if (words.length <= wordCount) {
+    return text.trim();
+  }
+
+  const start = Math.floor((words.length - wordCount) / 2);
+  return words.slice(start, start + wordCount).join(" ");
 }
 
 export function tokenizeForSearch(text: string): string[] {
@@ -274,10 +331,6 @@ export function splitChapterIntoChunks(
   return chunks.length > 0 ? chunks : [normalized];
 }
 
-function isGeneralIntentQuery(query: string): boolean {
-  return COMPLEX_INTENT_PATTERN.test(query);
-}
-
 export function rankChunks(
   chunks: string[],
   query: string,
@@ -286,7 +339,7 @@ export function rankChunks(
   const queryTokens = tokenizeForSearch(query);
   const selectedTokens = selectedText ? tokenizeForSearch(selectedText) : [];
   const normalizedSelected = selectedText?.trim().toLowerCase() ?? "";
-  const generalIntent = isGeneralIntentQuery(query);
+  const summaryIntent = detectChapterQueryIntent(query) === "summary";
 
   return chunks
     .map((chunk, index) => {
@@ -309,7 +362,7 @@ export function rankChunks(
         score += 100;
       }
 
-      if (generalIntent) {
+      if (summaryIntent) {
         const middle = (chunks.length - 1) / 2;
         score += Math.max(0, 3 - Math.abs(index - middle));
       }
@@ -333,22 +386,57 @@ function truncateToWords(text: string, maxWords: number): string {
   return words.slice(0, maxWords).join(" ");
 }
 
-function buildGeneralIntentExcerpt(fullText: string): string {
+function buildSummarySpreadExcerpt(fullText: string): string {
   const normalized = fullText.trim();
-  const words = normalized.split(/\s+/);
+  const head = takeFirstWords(normalized, SUMMARY_PART_WORDS);
+  const middle = takeMiddleWords(normalized, SUMMARY_PART_WORDS);
+  const tail = takeLastWords(normalized, SUMMARY_PART_WORDS);
 
-  if (words.length <= MAX_EXCERPT_WORDS) {
-    return normalized;
+  const combined = `${head}\n\n[…]\n\n${middle}\n\n[…]\n\n${tail}`;
+  return truncateToWords(combined, SUMMARY_EXCERPT_BUDGET);
+}
+
+function extractWindowAroundSelection(chunk: string, selectedText: string, maxWords: number): string {
+  const needle = selectedText.trim();
+  if (!needle) {
+    return truncateToWords(chunk, maxWords);
   }
 
-  const head = words.slice(0, GENERAL_INTENT_HEAD_WORDS).join(" ");
-  const tail = words.slice(-GENERAL_INTENT_TAIL_WORDS).join(" ");
+  const lowerChunk = chunk.toLowerCase();
+  const lowerNeedle = needle.toLowerCase();
+  let index = lowerChunk.indexOf(lowerNeedle);
 
-  if (words.length <= GENERAL_INTENT_HEAD_WORDS + GENERAL_INTENT_TAIL_WORDS) {
-    return normalized;
+  if (index < 0 && lowerNeedle.length > 80) {
+    index = lowerChunk.indexOf(lowerNeedle.slice(0, 80));
   }
 
-  return `${head}\n\n[…]\n\n${tail}`;
+  if (index < 0) {
+    return truncateToWords(chunk, maxWords);
+  }
+
+  const before = chunk.slice(0, index);
+  const fromMatch = chunk.slice(index);
+  const half = Math.floor(maxWords / 2);
+
+  const excerpt = `${takeLastWords(before, half)}\n\n${takeFirstWords(fromMatch, maxWords - half)}`.trim();
+  return truncateToWords(excerpt, maxWords);
+}
+
+function buildLocalExcerpt(
+  normalized: string,
+  chunks: string[],
+  selectedText: string,
+): ChapterExcerpt {
+  const ranked = rankChunks(chunks, "", selectedText);
+  const bestIndex = ranked[0]?.index ?? 0;
+  const bestChunk = chunks[bestIndex] ?? chunks[0] ?? normalized;
+
+  return {
+    excerpt: extractWindowAroundSelection(bestChunk, selectedText, LOCAL_EXCERPT_WORDS),
+    chunkIndex: bestIndex + 1,
+    totalChunks: chunks.length,
+    coverage: "partial",
+  };
 }
 
 export function selectRelevantChapterExcerpt(
@@ -358,35 +446,61 @@ export function selectRelevantChapterExcerpt(
 ): ChapterExcerpt {
   const normalized = fullText.trim();
   if (!normalized) {
-    return { excerpt: "", chunkIndex: 0, totalChunks: 0 };
+    return { excerpt: "", chunkIndex: 0, totalChunks: 0, coverage: "partial" };
   }
 
   const totalWords = countWords(normalized);
-  const generalIntent = isGeneralIntentQuery(query);
-
-  if (generalIntent && totalWords > SMALL_CHAPTER_WORDS) {
-    const chunks = splitChapterIntoChunks(normalized);
-    return {
-      excerpt: truncateToWords(buildGeneralIntentExcerpt(normalized), MAX_EXCERPT_WORDS),
-      chunkIndex: 0,
-      totalChunks: chunks.length,
-    };
-  }
-
-  if (totalWords <= SMALL_CHAPTER_WORDS) {
-    return {
-      excerpt: truncateToWords(normalized, MAX_EXCERPT_WORDS),
-      chunkIndex: 0,
-      totalChunks: 1,
-    };
-  }
-
+  const intent = detectChapterQueryIntent(query);
+  const selection = selectedText?.trim() ?? "";
   const chunks = splitChapterIntoChunks(normalized);
-  if (chunks.length <= 1) {
+  const totalChunks = chunks.length;
+
+  if (totalWords <= SMALL_CHAPTER_FULL_WORDS) {
     return {
-      excerpt: truncateToWords(chunks[0] ?? normalized, MAX_EXCERPT_WORDS),
+      excerpt: normalized,
       chunkIndex: 0,
       totalChunks: 1,
+      coverage: "full",
+    };
+  }
+
+  if (intent === "summary") {
+    return {
+      excerpt: buildSummarySpreadExcerpt(normalized),
+      chunkIndex: 0,
+      totalChunks,
+      coverage: "spread",
+    };
+  }
+
+  if (intent === "ending") {
+    return {
+      excerpt: takeLastWords(normalized, ENDING_EXCERPT_WORDS),
+      chunkIndex: totalChunks,
+      totalChunks,
+      coverage: "partial",
+    };
+  }
+
+  if (selection) {
+    if (totalChunks <= 1) {
+      return {
+        excerpt: extractWindowAroundSelection(normalized, selection, LOCAL_EXCERPT_WORDS),
+        chunkIndex: 1,
+        totalChunks: 1,
+        coverage: "partial",
+      };
+    }
+
+    return buildLocalExcerpt(normalized, chunks, selection);
+  }
+
+  if (totalChunks <= 1) {
+    return {
+      excerpt: truncateToWords(chunks[0] ?? normalized, DEFAULT_EXCERPT_WORDS),
+      chunkIndex: 0,
+      totalChunks: 1,
+      coverage: "partial",
     };
   }
 
@@ -401,8 +515,14 @@ export function selectRelevantChapterExcerpt(
     : bestChunk;
 
   return {
-    excerpt: truncateToWords(excerpt, MAX_EXCERPT_WORDS),
+    excerpt: truncateToWords(excerpt, DEFAULT_EXCERPT_WORDS),
     chunkIndex: bestIndex + 1,
-    totalChunks: chunks.length,
+    totalChunks,
+    coverage: "partial",
   };
+}
+
+/** @deprecated Use detectChapterQueryIntent instead */
+export function isGeneralIntentQuery(query: string): boolean {
+  return detectChapterQueryIntent(query) === "summary";
 }

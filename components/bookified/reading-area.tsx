@@ -1043,7 +1043,14 @@ export function ReadingArea({
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <div className="flex shrink-0 items-center gap-2">
-                      <CircularProgress value={progress} size={16} strokeWidth={3} />
+                      <CircularProgress
+                        value={progress}
+                        size={16}
+                        strokeWidth={3}
+                        ariaLabel={t("readingProgress", {
+                          percent: Math.round(progress),
+                        })}
+                      />
                     </div>
                   </TooltipTrigger>
                   <TooltipContent>{progress.toFixed(0)}%</TooltipContent>

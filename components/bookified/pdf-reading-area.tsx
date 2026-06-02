@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore
 import { Document, Page, pdfjs } from "react-pdf";
 import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Loader2, Maximize2, Minus, Plus } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { CircularProgress } from "@/components/ui/circular-progress";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -47,6 +48,7 @@ export function PdfReadingArea({
   isLoading: externalLoading = false,
   error: externalError = null,
 }: PdfReadingAreaProps) {
+  const t = useTranslations("reader");
   const containerRef = useRef<HTMLDivElement>(null);
   const pageContentRef = useRef<HTMLDivElement>(null);
   const [pdfData, setPdfData] = useState<Uint8Array | null>(null);
@@ -201,11 +203,13 @@ export function PdfReadingArea({
                 size="icon"
                 className="h-8 w-8 rounded-xl"
                 onClick={() => setFitWidth((value) => !value)}
+                aria-label={t("pdfFitWidth")}
+                aria-pressed={fitWidth}
               >
-                <Maximize2 className="h-4 w-4" />
+                <Maximize2 className="h-4 w-4" aria-hidden />
               </Button>
             </TooltipTrigger>
-            <TooltipContent>По ширине экрана</TooltipContent>
+            <TooltipContent>{t("pdfFitWidth")}</TooltipContent>
           </Tooltip>
 
           {!fitWidth && (
@@ -216,8 +220,9 @@ export function PdfReadingArea({
                 className="h-8 w-8 rounded-xl"
                 disabled={zoom <= 50}
                 onClick={() => setZoom((value) => Math.max(50, value - 10))}
+                aria-label={t("pdfZoomOut")}
               >
-                <Minus className="h-4 w-4" />
+                <Minus className="h-4 w-4" aria-hidden />
               </Button>
               <span className="w-10 text-center text-xs text-muted-foreground tabular-nums">
                 {zoom}%
@@ -228,8 +233,9 @@ export function PdfReadingArea({
                 className="h-8 w-8 rounded-xl"
                 disabled={zoom >= 100}
                 onClick={() => setZoom((value) => Math.min(100, value + 10))}
+                aria-label={t("pdfZoomIn")}
               >
-                <Plus className="h-4 w-4" />
+                <Plus className="h-4 w-4" aria-hidden />
               </Button>
             </>
           )}
@@ -238,8 +244,8 @@ export function PdfReadingArea({
         <div ref={containerRef} className="flex-1 overflow-auto px-3 py-6 pt-14 sm:px-4 sm:py-8 md:px-8">
           {isLoading ? (
             <div className="flex h-full flex-col items-center justify-center gap-3 text-muted-foreground">
-              <Loader2 className="h-8 w-8 animate-spin" />
-              <p className="text-sm">Загрузка PDF...</p>
+              <Loader2 className="h-8 w-8 animate-spin" aria-hidden />
+              <p className="text-sm">{t("pdfLoading")}</p>
             </div>
           ) : error ? (
             <div className="flex h-full flex-col items-center justify-center gap-2 text-center">
@@ -257,15 +263,15 @@ export function PdfReadingArea({
                 file={pdfFile}
                 loading={
                   <div className="flex flex-col items-center gap-2 py-12 text-muted-foreground">
-                    <Loader2 className="h-6 w-6 animate-spin" />
-                    <p className="text-sm">Открытие документа…</p>
+                    <Loader2 className="h-6 w-6 animate-spin" aria-hidden />
+                    <p className="text-sm">{t("pdfOpening")}</p>
                   </div>
                 }
                 onLoadSuccess={({ numPages }) => {
                   setResolvedPageCount(numPages);
                 }}
                 onLoadError={(e) => {
-                  setLoadError(e.message || "Не удалось открыть PDF");
+                  setLoadError(e.message || t("pdfLoadError"));
                 }}
                 className="pdf-reading-document"
               >
@@ -287,7 +293,7 @@ export function PdfReadingArea({
                     renderAnnotationLayer
                     onRenderSuccess={() => setLastRenderedPageKey(pageRenderKey)}
                     onRenderError={(e) => {
-                      setLoadError(e.message || "Не удалось отрисовать страницу");
+                      setLoadError(e.message || t("pdfRenderError"));
                     }}
                     loading={
                       <div className="flex min-h-[480px] items-center justify-center text-muted-foreground">
@@ -308,17 +314,22 @@ export function PdfReadingArea({
             className="min-h-10 gap-1 rounded-xl px-2 sm:min-h-11 sm:gap-2 sm:px-4"
             disabled={currentPage <= 1 || isLoading}
             onClick={goPrev}
-            aria-label="Предыдущая страница"
+            aria-label={t("pdfPrevPage")}
           >
-            <ChevronLeft className="h-4 w-4 shrink-0" />
-            <span className="hidden sm:inline">Предыдущая</span>
+            <ChevronLeft className="h-4 w-4 shrink-0" aria-hidden />
+            <span className="hidden sm:inline">{t("pdfPrevPageShort")}</span>
           </Button>
 
           <div className="flex min-w-0 items-center gap-2 text-xs leading-none text-muted-foreground sm:text-sm">
             <span className="truncate tabular-nums">
-              {currentPage} из {pageCount}
+              {t("pageOf", { current: currentPage, total: pageCount })}
             </span>
-            <CircularProgress value={progress} size={16} strokeWidth={3} />
+            <CircularProgress
+              value={progress}
+              size={16}
+              strokeWidth={3}
+              ariaLabel={t("readingProgress", { percent: Math.round(progress) })}
+            />
           </div>
 
           <Button
@@ -326,10 +337,10 @@ export function PdfReadingArea({
             className="min-h-10 gap-1 rounded-xl px-2 sm:min-h-11 sm:gap-2 sm:px-4"
             disabled={currentPage >= pageCount || isLoading}
             onClick={goNext}
-            aria-label="Следующая страница"
+            aria-label={t("pdfNextPage")}
           >
-            <span className="hidden sm:inline">Следующая</span>
-            <ChevronRight className="h-4 w-4 shrink-0" />
+            <span className="hidden sm:inline">{t("pdfNextPageShort")}</span>
+            <ChevronRight className="h-4 w-4 shrink-0" aria-hidden />
           </Button>
         </div>
 

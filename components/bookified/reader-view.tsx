@@ -414,6 +414,7 @@ export function ReaderView({ bookId }: ReaderViewProps) {
             className="min-h-10 min-w-20 rounded-xl"
             onClick={() => setLeftSidebarOpen(true)}
             aria-expanded={leftSidebarOpen}
+            aria-label={t("showLibrary")}
           >
             <BookOpen className="h-4 w-4 shrink-0" aria-hidden />
           </Button>
@@ -424,6 +425,7 @@ export function ReaderView({ bookId }: ReaderViewProps) {
             className="min-h-10 min-w-20 rounded-xl"
             onClick={() => setRightSidebarOpen(true)}
             aria-expanded={rightSidebarOpen}
+            aria-label={t("askAi")}
           >
             <Sparkles className="h-4 w-4 shrink-0" aria-hidden />
           </Button>

@@ -573,7 +573,7 @@ export function AISidebar({
                   ) : null}
 
                   {!showGreeting && visibleMessages.length > 0 ? (
-                    <div className="space-y-2">
+                    <div className="space-y-2" role="log" aria-live="polite" aria-relevant="additions">
                       {visibleMessages.map((message) => (
                         <MessageBlock
                           key={message.id}
@@ -591,7 +591,10 @@ export function AISidebar({
                   {showChatThinking ? <ThinkingBubble label={t("thinking")} /> : null}
 
                   {errorMessage ? (
-                    <div className="rounded-xl border border-destructive/30 bg-destructive/5 px-3 py-2.5">
+                    <div
+                      className="rounded-xl border border-destructive/30 bg-destructive/5 px-3 py-2.5"
+                      role="alert"
+                    >
                       <p className="text-sm text-destructive">{errorMessage}</p>
                       {lastFailedUserMessage ? (
                         <Button
@@ -654,7 +657,7 @@ export function AISidebar({
                     aria-label={t("placeholder")}
                     disabled={isLoading || isLiveVoiceActive}
                     rows={1}
-                    className="block max-h-40 min-h-9 w-full min-w-0 flex-1 resize-none overflow-hidden border-0 bg-transparent px-1 py-2 text-base leading-snug shadow-none outline-none ring-0 placeholder:text-muted-foreground focus-visible:border-transparent focus-visible:ring-0 focus-visible:ring-offset-0 disabled:opacity-50"
+                    className="block max-h-40 min-h-9 w-full min-w-0 flex-1 resize-none overflow-hidden border-0 bg-transparent px-1 py-2 text-base leading-snug shadow-none placeholder:text-muted-foreground focus-visible:border-transparent focus-visible:ring-2 focus-visible:ring-ring/50 disabled:opacity-50"
                   />
                   {hasInput ? (
                     <Button
@@ -665,7 +668,7 @@ export function AISidebar({
                       aria-label={t("send")}
                       className="mb-0.5 h-9 w-9 shrink-0 rounded-full bg-primary text-primary-foreground hover:bg-primary/90"
                     >
-                      <ArrowUp className="h-4 w-4" strokeWidth={2.5} />
+                      <ArrowUp className="h-4 w-4" strokeWidth={2.5} aria-hidden />
                     </Button>
                   ) : (
                     <>
@@ -723,7 +726,15 @@ export function AISidebar({
                     ? liveCanUserSpeak
                       ? t("voiceDialogActive")
                       : t("voiceDialogWaitForAi")
-                    : t("disclaimer")}
+                    : (
+                        <>
+                          {t("chapterContextHint")}
+                          <span className="mx-1 opacity-40" aria-hidden>
+                            ·
+                          </span>
+                          {t("disclaimer")}
+                        </>
+                      )}
                 </p>
               </footer>
               </div>

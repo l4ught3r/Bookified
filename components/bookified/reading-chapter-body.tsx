@@ -55,9 +55,9 @@ export const ReadingChapterBody = memo(
       >
         <div ref={ref} className={readingContentClassName} style={readingContentStyle}>
           <header className="mb-12 text-center">
-            <p className="mb-2 text-sm font-medium tracking-wider text-muted-foreground font-sans">
-              {derivedTitle} - {derivedAuthor}
-            </p>
+            <h1 className="mb-2 text-sm font-medium tracking-wider text-muted-foreground font-sans">
+              {derivedTitle} — {derivedAuthor}
+            </h1>
             <h2 className="text-sm font-sans text-muted-foreground">{derivedChapterTitle}</h2>
           </header>
 

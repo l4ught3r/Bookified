@@ -39,9 +39,11 @@ function buildSystemPrompt(params: {
   chapterText?: string;
   chunkIndex?: number;
   totalChunks?: number;
+  coverage?: "full" | "spread" | "partial";
   isPdf: boolean;
 }): string {
-  const { locale, book, chapterTitle, chapterText, chunkIndex, totalChunks, isPdf } = params;
+  const { locale, book, chapterTitle, chapterText, chunkIndex, totalChunks, coverage, isPdf } =
+    params;
   const title = book.title.trim() || (locale === "ru" ? "Без названия" : "Untitled");
   const authors = formatAuthors(book.authors);
   const authorLine = authors
@@ -101,7 +103,19 @@ function buildSystemPrompt(params: {
         : "PDF format: full chapter text is unavailable. Use book metadata and excerpts from the user's messages.",
     );
   } else if (chapterText?.trim()) {
-    if (totalChunks && totalChunks > 1 && chunkIndex) {
+    if (coverage === "full") {
+      lines.push(
+        "",
+        locale === "ru" ? "Текст текущей главы (полностью):" : "Current chapter text (full):",
+      );
+    } else if (coverage === "spread") {
+      lines.push(
+        "",
+        locale === "ru"
+          ? "Выдержки из главы (начало, середина и конец; полный текст не передан):"
+          : "Chapter excerpts (beginning, middle, and end; full chapter text not included):",
+      );
+    } else if (totalChunks && totalChunks > 1 && chunkIndex) {
       lines.push(
         "",
         locale === "ru"
@@ -109,7 +123,12 @@ function buildSystemPrompt(params: {
           : `Relevant chapter excerpt (${chunkIndex} of ${totalChunks}):`,
       );
     } else {
-      lines.push("", locale === "ru" ? "Текст текущей главы:" : "Current chapter text:");
+      lines.push(
+        "",
+        locale === "ru"
+          ? "Фрагмент текущей главы (не весь текст):"
+          : "Current chapter excerpt (not the full chapter):",
+      );
     }
 
     lines.push(chapterText.trim());
@@ -179,6 +198,7 @@ export async function buildBookAiContext(
         chapterText: excerpt.excerpt,
         chunkIndex: excerpt.chunkIndex,
         totalChunks: excerpt.totalChunks,
+        coverage: excerpt.coverage,
         isPdf: false,
       }),
     };
