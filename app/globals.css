@@ -46,10 +46,6 @@
   --overlay: oklch(0.28 0.008 65 / 0.3);
   --success: oklch(0.55 0.14 145);
 
-  --clerk-bg: oklch(0.965 0.018 92);
-  --clerk-fg: oklch(0.28 0.008 65);
-  --clerk-modal-bg: oklch(0.925 0.04 88 / 0.5);
-  --clerk-name-color: oklch(0.28 0.008 65);
   --user-hover-bg: oklch(0.925 0.04 88 / 0.55);
   --shadow-soft: oklch(0.28 0.008 65 / 0.28);
 }
@@ -94,12 +90,10 @@
   --overlay: oklch(0.15 0.005 65 / 0.5);
   --success: oklch(0.65 0.14 145);
 
-  --clerk-bg: oklch(0.22 0.008 65);
-  --clerk-fg: oklch(0.95 0.015 88);
-  --clerk-modal-bg: oklch(0.34 0.012 65 / 0.5);
-  --clerk-name-color: oklch(0.95 0.015 88);
   --user-hover-bg: oklch(0.34 0.012 65 / 0.65);
   --shadow-soft: oklch(0.1 0.005 65 / 0.55);
+  /* Clerk neutral scheme: light neutral tints for readable ghost buttons */
+  --clerk-color-neutral: var(--muted-foreground);
 }
 
 @theme inline {
@@ -151,7 +145,36 @@
   --color-success: var(--success);
 }
 
+/* Clerk — inherit app light/dark tokens (see clerk.com/docs/.../variables) */
+:root {
+  --clerk-color-primary: var(--primary);
+  --clerk-color-primary-foreground: var(--primary-foreground);
+  --clerk-color-foreground: var(--foreground);
+  --clerk-color-background: var(--popover);
+  --clerk-color-muted: var(--muted);
+  --clerk-color-muted-foreground: var(--muted-foreground);
+  --clerk-color-input: var(--input);
+  --clerk-color-input-foreground: var(--foreground);
+  --clerk-color-border: var(--border);
+  --clerk-color-ring: var(--ring);
+  --clerk-color-modal-backdrop: var(--overlay);
+  --clerk-color-neutral: var(--border);
+  --clerk-color-danger: var(--destructive);
+  --clerk-color-success: var(--success);
+  --clerk-color-shadow: var(--shadow-soft);
+  --clerk-border-radius: var(--radius);
+  --clerk-font-family: var(--font-sans);
+}
+
 @layer base {
+  html {
+    color-scheme: light;
+  }
+
+  html.dark {
+    color-scheme: dark;
+  }
+
   * {
     @apply border-border outline-ring/50;
   }
@@ -521,11 +544,11 @@
   transform: scale(0.98);
 }
 
-.cl-userButtonTrigger:focus-visible,
-.cl-userButtonBox:focus-visible {
-  outline: 2px solid var(--ring);
-  outline-offset: 2px;
-  box-shadow: 0 0 0 4px color-mix(in oklab, var(--ring) 25%, transparent);
+/* Clerk: без обводки при фокусе */
+:where([class*="cl-"]):focus,
+:where([class*="cl-"]):focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 .nav-user-link {
@@ -544,8 +567,69 @@
 
 .nav-user-link .cl-userButtonOuterIdentifier {
   overflow: hidden;
+  color: var(--foreground);
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+html.dark .cl-userButtonPopoverCard,
+html.dark .cl-userButtonPopoverMain,
+html.dark .cl-userButtonPopoverActions,
+html.dark .cl-navbar,
+html.dark .cl-modalContent,
+html.dark .cl-card,
+html.dark .cl-menuList {
+  background-color: var(--popover);
+  color: var(--foreground);
+  border-color: var(--border);
+}
+
+html.dark .cl-userButtonPopoverActionButton,
+html.dark .cl-userButtonPopoverCustomItemButton,
+html.dark .cl-menuItem,
+html.dark .cl-menuButton,
+html.dark .cl-profileSectionTitle,
+html.dark .cl-profileSectionContent,
+html.dark .cl-userPreviewMainIdentifier,
+html.dark .cl-userPreviewSecondaryIdentifier {
+  color: var(--foreground) !important;
+}
+
+html.dark .cl-userButtonPopoverActionButton:hover,
+html.dark .cl-userButtonPopoverActionButton:focus,
+html.dark .cl-userButtonPopoverCustomItemButton:hover,
+html.dark .cl-menuItem:hover,
+html.dark .cl-menuItem:focus,
+html.dark .cl-menuButton:hover {
+  background-color: var(--secondary);
+  color: var(--foreground);
+}
+
+html.dark .cl-userButtonPopoverActionButtonIcon,
+html.dark .cl-userButtonPopoverActionButtonIconBox {
+  color: var(--muted-foreground);
+}
+
+html.dark .cl-footerActionLink,
+html.dark .cl-formFieldAction,
+html.dark .cl-identityPreviewText {
+  color: var(--primary);
+}
+
+html.dark .cl-formFieldInput,
+html.dark .cl-selectButton {
+  background-color: var(--input);
+  color: var(--foreground);
+  border-color: var(--border);
+}
+
+html.dark .cl-formButtonPrimary {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+}
+
+html.dark .cl-dividerLine {
+  background-color: var(--border);
 }
 
 /* react-pdf: selectable text layer aligned with canvas */

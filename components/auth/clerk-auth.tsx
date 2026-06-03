@@ -13,13 +13,55 @@ import { useClerkRedirectUrl } from "@/lib/auth/use-clerk-redirect-url";
 import { clearReaderSession } from "@/lib/books/reader-storage";
 import { cn } from "@/lib/utils";
 
-const clerkAppearance = {
-  variables: {
-    colorPrimary: "#C9A962",
-    colorForeground: "var(--clerk-fg)",
-    colorBackground: "var(--clerk-bg)",
-    colorModalBackdrop: "var(--clerk-modal-bg)",
+const clerkAppearanceVariables = {
+  colorPrimary: "var(--clerk-color-primary)",
+  colorPrimaryForeground: "var(--clerk-color-primary-foreground)",
+  colorForeground: "var(--clerk-color-foreground)",
+  colorBackground: "var(--clerk-color-background)",
+  colorMuted: "var(--clerk-color-muted)",
+  colorMutedForeground: "var(--clerk-color-muted-foreground)",
+  colorInput: "var(--clerk-color-input)",
+  colorInputForeground: "var(--clerk-color-input-foreground)",
+  colorBorder: "var(--clerk-color-border)",
+  colorRing: "var(--clerk-color-ring)",
+  colorModalBackdrop: "var(--clerk-color-modal-backdrop)",
+  colorNeutral: "var(--clerk-color-neutral)",
+  colorDanger: "var(--clerk-color-danger)",
+  colorSuccess: "var(--clerk-color-success)",
+  colorShadow: "var(--clerk-color-shadow)",
+  borderRadius: "var(--clerk-border-radius)",
+  fontFamily: "var(--clerk-font-family)",
+} as const;
+
+const clerkUserButtonAppearance = {
+  variables: clerkAppearanceVariables,
+  elements: {
+    userButtonPopoverCard: {
+      backgroundColor: "var(--popover)",
+      color: "var(--foreground)",
+      boxShadow: "0 8px 32px var(--shadow-soft)",
+    },
+    userButtonPopoverMain: {
+      backgroundColor: "var(--popover)",
+      color: "var(--foreground)",
+    },
+    userButtonPopoverActionButton: {
+      color: "var(--foreground)",
+    },
+    userButtonPopoverActionButtonIcon: {
+      color: "var(--muted-foreground)",
+    },
+    userButtonPopoverFooter: {
+      backgroundColor: "var(--popover)",
+    },
   },
+} as const;
+
+const clerkAppearance = {
+  variables: clerkAppearanceVariables,
+  signIn: { variables: clerkAppearanceVariables },
+  signUp: { variables: clerkAppearanceVariables },
+  userButton: clerkUserButtonAppearance,
 } as const;
 
 type ClerkAuthProviderProps = {
@@ -118,7 +160,7 @@ export function ClerkAuthControls() {
         <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" aria-hidden />
       ) : isSignedIn ? (
         <div className="nav-user-link min-w-0">
-          <UserButton showName={!isMobileLayout} />
+          <UserButton showName={!isMobileLayout} appearance={clerkUserButtonAppearance} />
         </div>
       ) : (
         <AuthSignInButton>
