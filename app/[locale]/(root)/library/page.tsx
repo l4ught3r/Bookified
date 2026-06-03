@@ -278,7 +278,7 @@ export default function LibraryPage() {
 
       <main
         id="main-content"
-        className="surface-library min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-3 py-5 pb-[calc(5rem+env(safe-area-inset-bottom))] [scrollbar-gutter:stable] sm:px-4 sm:py-6 md:px-8 lg:px-12 lg:pb-6"
+        className="surface-library min-h-0 flex-1 overflow-y-auto overscroll-y-contain py-5 pl-[max(0.75rem,env(safe-area-inset-left))] pr-[max(0.75rem,env(safe-area-inset-right))] pb-[calc(5rem+env(safe-area-inset-bottom))] [scrollbar-gutter:stable] sm:py-6 sm:pl-4 sm:pr-4 md:pl-8 md:pr-8 lg:px-12 lg:pb-6"
       >
         <div className="mx-auto max-w-7xl">
           <div className="mb-3 sm:mb-4">

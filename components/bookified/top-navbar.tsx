@@ -48,7 +48,7 @@ export function TopNavbar({ immersiveHidden = false }: TopNavbarProps) {
   return (
     <header
       className={cn(
-        "sticky top-0 z-50 flex h-14 shrink-0 items-center border-b border-border/50 bg-card px-2 pt-[env(safe-area-inset-top)] transition-[height,opacity,border-color,padding] duration-300 ease-in-out motion-reduce:transition-none sm:h-16 sm:px-4",
+        "sticky top-0 z-50 flex h-14 w-full shrink-0 items-center border-b border-border/50 bg-card pt-[env(safe-area-inset-top)] pl-[max(0.5rem,env(safe-area-inset-left))] pr-[max(0.5rem,env(safe-area-inset-right))] transition-[height,opacity,border-color,padding] duration-300 ease-in-out motion-reduce:transition-none sm:h-16 sm:pl-4 sm:pr-4",
         immersiveHidden &&
           "max-lg:h-0 max-lg:min-h-0 max-lg:overflow-hidden max-lg:border-b-0 max-lg:opacity-0 max-lg:pointer-events-none max-lg:pt-0",
       )}

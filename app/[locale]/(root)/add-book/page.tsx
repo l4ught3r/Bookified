@@ -433,7 +433,7 @@ export default function AddBookPage() {
       <main
         id="main-content"
         ref={mainScrollRef}
-        className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-y-contain px-3 py-5 pb-[calc(5rem+env(safe-area-inset-bottom))] sm:px-4 sm:py-6 md:px-8 lg:px-12 lg:pb-6 lg:[scrollbar-gutter:stable]"
+        className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-y-contain py-5 pl-[max(0.75rem,env(safe-area-inset-left))] pr-[max(0.75rem,env(safe-area-inset-right))] pb-[calc(5rem+env(safe-area-inset-bottom))] sm:py-6 sm:pl-4 sm:pr-4 md:pl-8 md:pr-8 lg:px-12 lg:pb-6 lg:[scrollbar-gutter:stable]"
       >
         <div className="mx-auto w-full min-w-0 max-w-3xl">
           {/* Header */}

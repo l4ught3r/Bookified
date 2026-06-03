@@ -614,7 +614,7 @@ export function AISidebar({
                 </div>
               </div>
 
-              <footer className="shrink-0 p-4 pt-0">
+              <footer className="shrink-0 p-4 pt-0 max-lg:text-center">
                 {liveVoiceWarningMessage ? (
                   <p
                     className="mb-3 text-center text-xs leading-relaxed text-amber-700 dark:text-amber-500"
@@ -721,7 +721,7 @@ export function AISidebar({
                     </>
                   )}
                 </div>
-                <p className="mt-2 px-1 text-center text-[11px] leading-relaxed text-muted-foreground">
+                <p className="mt-2 w-full px-1 text-center text-[11px] leading-relaxed text-muted-foreground max-lg:px-2">
                   {isLiveVoiceActive
                     ? liveCanUserSpeak
                       ? t("voiceDialogActive")

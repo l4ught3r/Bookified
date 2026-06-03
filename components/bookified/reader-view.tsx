@@ -449,7 +449,7 @@ export function ReaderView({ bookId }: ReaderViewProps) {
           tocTitle={isPdf ? t("pages") : t("toc")}
         />
 
-        <main id="main-content" className="flex h-full min-h-0 min-w-0 flex-1 flex-col">
+        <main id="main-content" className="flex h-full min-h-0 w-full min-w-0 flex-1 flex-col">
           {isPdf ? (
             <PdfReadingArea
               bookId={bookId}
@@ -587,7 +587,7 @@ export function ReaderEmptyState() {
           onToggle={() => setLeftSidebarOpen((open) => !open)}
         />
 
-        <main id="main-content" className="flex h-full min-h-0 min-w-0 flex-1 flex-col">
+        <main id="main-content" className="flex h-full min-h-0 w-full min-w-0 flex-1 flex-col">
           <div className="flex h-full flex-col items-center justify-center gap-5 bg-reading-bg px-4 py-6 text-center sm:px-6">
             <div className="max-w-md space-y-2">
               <h1 className="type-page-title">{t("selectBook")}</h1>
