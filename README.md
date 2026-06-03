@@ -11,14 +11,18 @@
   <br />
   <img src="https://img.shields.io/badge/Next.js-16-000000?style=for-the-badge&logo=next.js&logoColor=white" alt="Next.js 16" />
   <img src="https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React 19" />
-  <img src="https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript 5" />
   <br />
   <img src="https://img.shields.io/badge/Clerk-Auth-6C47FF?style=for-the-badge&logo=clerk&logoColor=white" alt="Clerk" />
-  <img src="https://img.shields.io/badge/Supabase-Storage-3FCF8E?style=for-the-badge&logo=supabase&logoColor=white" alt="Supabase" />
-  <img src="https://img.shields.io/badge/Postgres-Drizzle-4169E1?style=for-the-badge&logo=postgresql&logoColor=white" alt="Postgres" />
+  <img src="https://img.shields.io/badge/PostgreSQL-Drizzle-4169E1?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL + Drizzle" />
+  <img src="https://img.shields.io/badge/Supabase-Storage-3FCF8E?style=for-the-badge&logo=supabase&logoColor=white" alt="Supabase Storage" />
   <br />
-  <img src="https://img.shields.io/badge/Tailwind-4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind" />
-  <img src="https://img.shields.io/badge/Gemini-AI-8E75B2?style=for-the-badge&logo=google&logoColor=white" alt="Gemini" />
+  <img src="https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS 4" />
+  <img src="https://img.shields.io/badge/shadcn/ui-000000?style=for-the-badge" alt="shadcn/ui" />
+  <img src="https://img.shields.io/badge/Dexie-IndexedDB-FF6B35?style=for-the-badge" alt="Dexie" />
+  <br />
+  <img src="https://img.shields.io/badge/Vercel_AI_SDK-000000?style=for-the-badge&logo=vercel&logoColor=white" alt="Vercel AI SDK" />
+  <img src="https://img.shields.io/badge/Google_Gemini-8E75B2?style=for-the-badge&logo=google&logoColor=white" alt="Google Gemini" />
 </div>
 
 ---
@@ -57,18 +61,21 @@ The UI is available in **English** and **Russian** (`next-intl`, locale prefix i
 
 ## Tech stack
 
-| Layer        | Technology                                                                                                      |
-| ------------ | --------------------------------------------------------------------------------------------------------------- |
-| Framework    | [Next.js 16](https://nextjs.org/) (App Router, Route Handlers)                                                  |
-| UI           | [React 19](https://react.dev/), [Tailwind CSS 4](https://tailwindcss.com/), [shadcn/ui](https://ui.shadcn.com/) |
-| Auth         | [Clerk](https://clerk.com/)                                                                                     |
-| Database     | [PostgreSQL](https://www.postgresql.org/) + [Drizzle ORM](https://orm.drizzle.team/)                            |
-| File storage | [Supabase Storage](https://supabase.com/storage)                                                                |
-| Offline      | [Dexie](https://dexie.org/) (IndexedDB)                                                                         |
-| i18n         | [next-intl](https://next-intl-docs.vercel.app/)                                                                 |
-| AI           | [Vercel AI SDK](https://sdk.vercel.ai/) + `@ai-sdk/google` (Gemini)                                             |
-| PDF          | [react-pdf](https://github.com/wojtekmaj/react-pdf) + pdfjs-dist                                                |
-| EPUB         | [@lingo-reader/epub-parser](https://www.npmjs.com/package/@lingo-reader/epub-parser), cheerio                   |
+| Layer        | Technology                                                                                                                                                                  |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Framework    | [Next.js 16](https://nextjs.org/) (App Router, Route Handlers)                                                                                                              |
+| UI           | [React 19](https://react.dev/), [Tailwind CSS 4](https://tailwindcss.com/), [shadcn/ui](https://ui.shadcn.com/) (Radix UI), [Framer Motion](https://www.framer.com/motion/) |
+| State        | [Zustand](https://zustand.docs.pmnd.rs/)                                                                                                                                    |
+| Auth         | [Clerk](https://clerk.com/)                                                                                                                                                 |
+| Database     | [PostgreSQL](https://www.postgresql.org/) + [Drizzle ORM](https://orm.drizzle.team/)                                                                                        |
+| File storage | [Supabase Storage](https://supabase.com/storage)                                                                                                                            |
+| Offline      | [Dexie](https://dexie.org/) (IndexedDB) + dexie-react-hooks                                                                                                                 |
+| i18n         | [next-intl](https://next-intl-docs.vercel.app/)                                                                                                                             |
+| AI           | [Vercel AI SDK](https://sdk.vercel.ai/) (`ai`, `@ai-sdk/react`, `@ai-sdk/google`) + [@google/genai](https://www.npmjs.com/package/@google/genai) (Gemini Live voice)        |
+| PDF          | [react-pdf](https://github.com/wojtekmaj/react-pdf), pdfjs-dist, pdf-parse                                                                                                  |
+| EPUB         | [@lingo-reader/epub-parser](https://www.npmjs.com/package/@lingo-reader/epub-parser), cheerio, sanitize-html                                                                |
+| FB2          | Custom parser (fast-xml-parser, adm-zip for `.fb2.zip`)                                                                                                                     |
+| Reader UX    | [@tanstack/react-virtual](https://tanstack.com/virtual) (long chapters)                                                                                                     |
 
 Optional (local / advanced): **Playwright** for browser-based EPUB typography extraction (`BOOKIFIED_PLAYWRIGHT_TYPOGRAPHY`).
 
