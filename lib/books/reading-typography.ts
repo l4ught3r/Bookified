@@ -31,6 +31,7 @@ export const DEFAULT_READING_TYPOGRAPHY: ReadingTypographySettings = {
 };
 
 export const MOBILE_DEFAULT_READING_FONT_SIZE = 14;
+export const MOBILE_DEFAULT_READING_LINE_HEIGHT = 1.4;
 
 export function getPlatformDefaultReadingTypography(
   isMobileLayout: boolean,
@@ -42,6 +43,7 @@ export function getPlatformDefaultReadingTypography(
   return {
     ...DEFAULT_READING_TYPOGRAPHY,
     fontSize: MOBILE_DEFAULT_READING_FONT_SIZE,
+    lineHeight: MOBILE_DEFAULT_READING_LINE_HEIGHT,
   };
 }
 

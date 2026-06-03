@@ -202,7 +202,6 @@
     "stopRecording": "Stop recording",
     "placeholder": "Ask a question about the book...",
     "disclaimer": "AI may make mistakes. Verify important information.",
-    "chapterContextHint": "The assistant sees a portion of the current chapter, not necessarily the full text.",
     "tryAsking": "Try asking:",
     "copy": "Copy",
     "copied": "Copied",

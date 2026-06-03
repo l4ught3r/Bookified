@@ -15,7 +15,11 @@ import {
 import { Link, usePathname } from "@/lib/i18n/navigation";
 import { cn } from "@/lib/utils";
 
-export function TopNavbar() {
+interface TopNavbarProps {
+  immersiveHidden?: boolean;
+}
+
+export function TopNavbar({ immersiveHidden = false }: TopNavbarProps) {
   const t = useTranslations("nav");
   const tReader = useTranslations("reader");
   const tCommon = useTranslations("common");
@@ -42,7 +46,13 @@ export function TopNavbar() {
   ] as const;
 
   return (
-    <header className="sticky top-0 z-50 flex h-14 shrink-0 items-center border-b border-border/50 bg-card px-2 pt-[env(safe-area-inset-top)] sm:h-16 sm:px-4">
+    <header
+      className={cn(
+        "sticky top-0 z-50 flex h-14 shrink-0 items-center border-b border-border/50 bg-card px-2 pt-[env(safe-area-inset-top)] transition-[height,opacity,border-color,padding] duration-300 ease-in-out motion-reduce:transition-none sm:h-16 sm:px-4",
+        immersiveHidden &&
+          "max-lg:h-0 max-lg:min-h-0 max-lg:overflow-hidden max-lg:border-b-0 max-lg:opacity-0 max-lg:pointer-events-none max-lg:pt-0",
+      )}
+    >
       <div className="flex min-w-0 flex-1 items-center justify-start">
         {showMobileReaderBackButton ? (
           <Button variant="ghost" className="h-10 gap-0.5 rounded-xl px-2 sm:px-3" asChild>

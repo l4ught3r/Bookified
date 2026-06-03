@@ -726,15 +726,7 @@ export function AISidebar({
                     ? liveCanUserSpeak
                       ? t("voiceDialogActive")
                       : t("voiceDialogWaitForAi")
-                    : (
-                        <>
-                          {t("chapterContextHint")}
-                          <span className="mx-1 opacity-40" aria-hidden>
-                            ·
-                          </span>
-                          {t("disclaimer")}
-                        </>
-                      )}
+                    : t("disclaimer")}
                 </p>
               </footer>
               </div>

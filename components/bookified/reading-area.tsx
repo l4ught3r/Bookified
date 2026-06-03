@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore, type MouseEvent, type TouchEvent } from "react";
 import {
   AlignCenter,
   AlignJustify,
@@ -67,6 +67,7 @@ import {
   getPlatformDefaultReadingTypography,
   isBookOriginalFont,
   MOBILE_DEFAULT_READING_FONT_SIZE,
+  MOBILE_DEFAULT_READING_LINE_HEIGHT,
   normalizeReadingTypography,
   resolveReadingFontFamily,
   type ReadingTypographySettings,
@@ -117,6 +118,8 @@ interface ReadingAreaProps {
     onOpenLeftSidebar: () => void;
     onOpenRightSidebar: () => void;
   };
+  navbarVisible?: boolean;
+  onNavbarVisibleChange?: (visible: boolean) => void;
 }
 
 export function ReadingArea({
@@ -135,6 +138,8 @@ export function ReadingArea({
   canGoPrev = false,
   canGoNext = false,
   mobileSidebarChrome,
+  navbarVisible: navbarVisibleProp = true,
+  onNavbarVisibleChange,
 }: ReadingAreaProps) {
   const t = useTranslations("reader");
   const locale = useLocale();
@@ -167,19 +172,28 @@ export function ReadingArea({
       return merged;
     }
 
-    const bookFontSize = typography?.fontSize;
-    const usesBookFontSize =
-      bookFontSize != null && bookFontSize !== DEFAULT_READING_TYPOGRAPHY.fontSize;
+    const mobilePatch: Partial<ReadingTypographySettings> = {};
 
-    if (usesBookFontSize) {
+    if (typography?.fontSize == null || typography.fontSize === DEFAULT_READING_TYPOGRAPHY.fontSize) {
+      mobilePatch.fontSize = MOBILE_DEFAULT_READING_FONT_SIZE;
+    }
+
+    if (
+      typography?.lineHeight == null ||
+      typography.lineHeight === DEFAULT_READING_TYPOGRAPHY.lineHeight
+    ) {
+      mobilePatch.lineHeight = MOBILE_DEFAULT_READING_LINE_HEIGHT;
+    }
+
+    if (Object.keys(mobilePatch).length === 0) {
       return merged;
     }
 
     return normalizeReadingTypography({
       ...merged,
-      fontSize: MOBILE_DEFAULT_READING_FONT_SIZE,
+      ...mobilePatch,
     });
-  }, [bookTypography, storedTypography, isMobileLayout, typography?.fontSize]);
+  }, [bookTypography, storedTypography, isMobileLayout, typography]);
 
   const updateTypography = useCallback(
     (patch: Partial<StoredReadingTypographySettings>) => {
@@ -225,11 +239,10 @@ export function ReadingArea({
   const pendingBookmarkScrollRef = useRef<ReaderBookmark | null>(null);
   const readingContentRef = useRef<HTMLDivElement>(null);
   const scrollPersistReadyRef = useRef(false);
-  const lastScrollTopRef = useRef(0);
+  const tapTrackerRef = useRef({ x: 0, y: 0, moved: false });
   const chapterOrder = chapter?.order;
   const [readerUi, setReaderUi] = useState({
     chapterOrder,
-    chromeVisible: true,
     typographyOpen: false,
     contentsOpen: false,
   });
@@ -237,15 +250,17 @@ export function ReadingArea({
   if (readerUi.chapterOrder !== chapterOrder) {
     setReaderUi({
       chapterOrder,
-      chromeVisible: true,
       typographyOpen: false,
       contentsOpen: false,
     });
   }
 
-  const readerChromeVisible = readerUi.chromeVisible;
   const typographyOpen = readerUi.typographyOpen;
   const contentsOpen = readerUi.contentsOpen;
+  const typographyDismissPendingRef = useRef(false);
+  const closeTypography = useCallback(() => {
+    setReaderUi((prev) => (prev.typographyOpen ? { ...prev, typographyOpen: false } : prev));
+  }, []);
   const [scrollTop, setScrollTop] = useState(0);
   const [viewportHeight, setViewportHeight] = useState(0);
   const [chapterScrollPercent, setChapterScrollPercent] = useState(0);
@@ -386,23 +401,9 @@ export function ReadingArea({
   }, [bookId, chapter?.order, chapterHtml, chapterText, isLoading]);
 
   useEffect(() => {
-    if (readerChromeVisible) {
-      return;
-    }
-
-    const timeoutId = window.setTimeout(() => {
-      setReaderUi((prev) => ({ ...prev, typographyOpen: false, contentsOpen: false }));
-    }, 300);
-
-    return () => window.clearTimeout(timeoutId);
-  }, [readerChromeVisible]);
-
-  useEffect(() => {
     const container = contentRef.current;
     const chapterOrder = chapter?.order;
     if (!container || chapterOrder == null) return;
-
-    lastScrollTopRef.current = 0;
 
     let timeout: ReturnType<typeof setTimeout> | undefined;
 
@@ -429,19 +430,6 @@ export function ReadingArea({
     const handleScroll = () => {
       scrollPersistReadyRef.current = true;
       updateScrollMetrics();
-
-      const scrollTopValue = container.scrollTop;
-      const delta = scrollTopValue - lastScrollTopRef.current;
-
-      if (scrollTopValue <= 8) {
-        setReaderUi((prev) => ({ ...prev, chromeVisible: true }));
-      } else if (delta > 6) {
-        setReaderUi((prev) => ({ ...prev, chromeVisible: false }));
-      } else if (delta < -6) {
-        setReaderUi((prev) => ({ ...prev, chromeVisible: true }));
-      }
-
-      lastScrollTopRef.current = scrollTopValue;
 
       if (timeout) clearTimeout(timeout);
       timeout = setTimeout(persistScroll, 150);
@@ -609,6 +597,70 @@ export function ReadingArea({
 
   const useMobileTopChrome = isMobileLayout && mobileSidebarChrome != null;
 
+  const shouldIgnoreNavbarToggle = useCallback((target: EventTarget | null) => {
+    if (!(target instanceof Element)) return true;
+    if (
+      target.closest(
+        "a, button, input, textarea, select, [role='button'], [data-no-chrome-toggle]",
+      )
+    ) {
+      return true;
+    }
+    const selection = window.getSelection();
+    return Boolean(selection && !selection.isCollapsed);
+  }, []);
+
+  const handleContentTouchStart = useCallback(
+    (event: TouchEvent<HTMLDivElement>) => {
+      typographyDismissPendingRef.current = typographyOpen;
+      if (!isMobileLayout || event.touches.length !== 1) return;
+      const touch = event.touches[0];
+      tapTrackerRef.current = { x: touch.clientX, y: touch.clientY, moved: false };
+    },
+    [isMobileLayout, typographyOpen],
+  );
+
+  const handleContentTouchMove = useCallback(
+    (event: TouchEvent<HTMLDivElement>) => {
+      if (!isMobileLayout || event.touches.length !== 1) return;
+      const touch = event.touches[0];
+      const { x, y } = tapTrackerRef.current;
+      if (Math.hypot(touch.clientX - x, touch.clientY - y) > 10) {
+        tapTrackerRef.current.moved = true;
+      }
+    },
+    [isMobileLayout],
+  );
+
+  const toggleNavbar = useCallback(() => {
+    onNavbarVisibleChange?.(!navbarVisibleProp);
+  }, [navbarVisibleProp, onNavbarVisibleChange]);
+
+  const handleContentTouchEnd = useCallback(
+    (event: TouchEvent<HTMLDivElement>) => {
+      if (typographyDismissPendingRef.current) {
+        typographyDismissPendingRef.current = false;
+        return;
+      }
+      if (!isMobileLayout || !onNavbarVisibleChange || tapTrackerRef.current.moved) return;
+      if (shouldIgnoreNavbarToggle(event.target)) return;
+      toggleNavbar();
+    },
+    [isMobileLayout, onNavbarVisibleChange, shouldIgnoreNavbarToggle, toggleNavbar],
+  );
+
+  const handleContentClick = useCallback(
+    (event: MouseEvent<HTMLDivElement>) => {
+      if (typographyOpen) return;
+      if (!isMobileLayout || !onNavbarVisibleChange || window.matchMedia("(pointer: coarse)").matches) {
+        return;
+      }
+      if (shouldIgnoreNavbarToggle(event.target)) return;
+      toggleNavbar();
+    },
+    [isMobileLayout, onNavbarVisibleChange, shouldIgnoreNavbarToggle, toggleNavbar, typographyOpen],
+  );
+
   const readerChromeActions = (
     <>
       <Popover
@@ -633,7 +685,7 @@ export function ReadingArea({
         </Tooltip>
         <PopoverContent
           className={cn(
-            "overflow-visible rounded-xl border-border/50 p-4",
+            "z-[70] overflow-visible rounded-xl border-border/50 p-4",
             isMobileLayout
               ? "w-[calc(100vw-1rem)] max-w-md"
               : "w-[min(calc(100vw-2rem),20rem)]",
@@ -670,7 +722,7 @@ export function ReadingArea({
                     <div className="mx-2 h-5 w-px border-r-2 bg-border" />
                     <SelectValue placeholder={t("fontPlaceholder")} />
                   </SelectTrigger>
-                  <SelectContent className="max-h-none overflow-visible rounded-sm **:data-[slot=select-scroll-down-button]:hidden **:data-[slot=select-scroll-up-button]:hidden">
+                  <SelectContent className="z-[80] max-h-none overflow-visible rounded-sm **:data-[slot=select-scroll-down-button]:hidden **:data-[slot=select-scroll-up-button]:hidden">
                     <SelectGroup>
                       {fontPickerOptions.map((font) => (
                         <SelectItem
@@ -895,6 +947,17 @@ export function ReadingArea({
 
   return (
     <TooltipProvider>
+      {typographyOpen ? (
+        <div
+          className="fixed inset-0 z-[60]"
+          aria-hidden
+          onPointerDown={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            closeTypography();
+          }}
+        />
+      ) : null}
       <div className="relative flex h-full flex-1 flex-col bg-reading-bg">
         <div className="absolute left-0 right-0 top-0 z-10 hidden h-1 overflow-hidden bg-border/30 lg:block">
           <div
@@ -906,9 +969,10 @@ export function ReadingArea({
         {useMobileTopChrome ? (
           <div
             className={cn(
-              "fixed inset-x-0 z-20 flex items-center justify-between gap-2 border-b border-border/40 bg-card px-3 py-2 transition-[opacity,transform] duration-300 ease-in-out motion-reduce:transition-none lg:hidden",
-              "top-[calc(env(safe-area-inset-top)+3.5rem)]",
-              readerChromeVisible ? "translate-y-0 opacity-100" : "pointer-events-none opacity-0",
+              "fixed inset-x-0 z-20 flex items-center justify-between gap-2 border-b border-border/40 bg-card px-3 py-2 transition-[top] duration-300 ease-in-out motion-reduce:transition-none lg:hidden",
+              navbarVisibleProp
+                ? "top-[calc(env(safe-area-inset-top)+3.5rem)]"
+                : "top-[env(safe-area-inset-top)]",
             )}
           >
             <Button
@@ -940,12 +1004,7 @@ export function ReadingArea({
             </Button>
           </div>
         ) : (
-          <div
-            className={cn(
-              "absolute right-2 top-3 z-20 flex max-w-[calc(100%-1rem)] items-center gap-0.5 overflow-x-auto rounded-2xl border border-border/50 bg-card p-1 shadow-sm transition-[opacity,transform] duration-300 ease-in-out motion-reduce:transition-none sm:right-5 sm:top-4 sm:gap-1 sm:p-1.5",
-              readerChromeVisible ? "translate-y-0 opacity-100" : "pointer-events-none  opacity-0",
-            )}
-          >
+          <div className="absolute right-2 top-3 z-20 flex max-w-[calc(100%-1rem)] items-center gap-0.5 overflow-x-auto rounded-2xl border border-border/50 bg-card p-1 shadow-sm sm:right-5 sm:top-4 sm:gap-1 sm:p-1.5">
             {readerChromeActions}
           </div>
         )}
@@ -956,6 +1015,10 @@ export function ReadingArea({
             "flex-1 overflow-y-auto px-4 py-10 sm:px-6 sm:py-12 md:px-8 lg:px-24",
             useMobileTopChrome ? "pt-14 sm:pt-12" : "pt-12 sm:pt-16",
           )}
+          onTouchStart={handleContentTouchStart}
+          onTouchMove={handleContentTouchMove}
+          onTouchEnd={handleContentTouchEnd}
+          onClick={handleContentClick}
         >
           {showLoading ? (
             <div className="flex h-full flex-col items-center justify-center gap-3 text-muted-foreground">

@@ -109,6 +109,7 @@ export function ReaderView({ bookId }: ReaderViewProps) {
   const [leftSidebarOpen, setLeftSidebarOpen] = useState(true);
   const [rightSidebarOpen, setRightSidebarOpen] = useState(true);
   const [aiPrompt, setAiPrompt] = useState<string | undefined>();
+  const [navbarVisible, setNavbarVisible] = useState(true);
   const isMobileLayout = useIsMobileLayout();
 
   const [book, setBook] = useState<ReaderBookMeta | null>(null);
@@ -174,6 +175,10 @@ export function ReaderView({ bookId }: ReaderViewProps) {
     );
   }, [currentChapter, sidebarChapters]);
   const isCoverPage = !isPdf && !loadingBook && currentChapterIndex === 0;
+
+  useEffect(() => {
+    setNavbarVisible(true);
+  }, [currentChapterIndex]);
 
   useEffect(() => {
     const mqMobile = window.matchMedia("(max-width: 1023px)");
@@ -403,7 +408,7 @@ export function ReaderView({ bookId }: ReaderViewProps) {
 
   return (
     <ReadingFontsProvider className="flex h-dvh flex-col bg-background">
-      <TopNavbar />
+      <TopNavbar immersiveHidden={isMobileLayout && !navbarVisible} />
 
       {isMobileLayout && (isPdf || isCoverPage) ? (
         <div className="flex shrink-0 items-center justify-between gap-2 border-b border-border/40 bg-card px-3 py-2 lg:hidden">
@@ -494,6 +499,8 @@ export function ReaderView({ bookId }: ReaderViewProps) {
                 onOpenLeftSidebar: () => setLeftSidebarOpen(true),
                 onOpenRightSidebar: () => setRightSidebarOpen(true),
               }}
+              navbarVisible={navbarVisible}
+              onNavbarVisibleChange={setNavbarVisible}
             />
           )}
         </main>
